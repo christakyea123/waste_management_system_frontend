@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | 035 F Arkoh Waste Management</title>
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+      --green-600: #16a34a; --green-700: #15803d; --green-800: #166534;
+      --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1; --gray-400: #94a3b8; --gray-500: #64748b;
+      --gray-700: #334155; --gray-900: #0f172a;
+      --red-50: #fef2f2; --red-400: #f87171; --red-600: #dc2626;
+      --white: #ffffff;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+      --radius: 10px;
+      --radius-lg: 20px;
+      --transition: 0.2s ease;
+    }
+    html, body {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--gray-900);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      min-height: 100vh;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ---- BUTTONS ---- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-decoration: none;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .btn-primary { background: var(--green-600); color: var(--white); border-color: var(--green-600); }
+    .btn-primary:hover:not(:disabled) { background: var(--green-700); border-color: var(--green-700); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(22,163,74,0.35); }
+    .btn-secondary { background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200); }
+    .btn-secondary:hover:not(:disabled) { background: var(--gray-200); }
+    .btn-full { width: 100%; }
+
+    /* ---- LAYOUT ---- */
+    .auth-container { width: 100%; max-width: 600px; }
+    .auth-logo { text-align: center; margin-bottom: 1.75rem; }
+    .auth-logo img { height: 64px; width: auto; max-width: 220px; object-fit: contain; border-radius: 8px; }
+    .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-lg); }
+    .auth-card h1 { font-size: 1.6rem; font-weight: 800; color: var(--gray-900); margin-bottom: 0.3rem; }
+    .auth-card > p { color: var(--gray-500); margin-bottom: 1.75rem; font-size: 0.9rem; }
+
+    /* ---- PROGRESS STEPS ---- */
+    .progress-steps { display: flex; align-items: center; margin-bottom: 2rem; }
+    .step-dot {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gray-200); color: var(--gray-400);
+      font-size: 0.8rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.3s;
+    }
+    .step-dot.active { background: var(--green-600); color: var(--white); }
+    .step-dot.done { background: var(--green-100); color: var(--green-700); }
+    .step-line { flex: 1; height: 2px; background: var(--gray-200); transition: background 0.3s; }
+    .step-line.done { background: var(--green-600); }
+
+    /* ---- FORM ---- */
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+    .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--gray-700); }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.72rem 1rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--gray-900);
+      background: var(--white);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group select:focus { outline: none; border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+    .form-group small { font-size: 0.75rem; color: var(--gray-400); }
+    .error-msg { font-size: 0.77rem; color: var(--red-600); display: none; }
+    .form-group.has-error input,
+    .form-group.has-error select { border-color: var(--red-400); }
+    .form-group.has-error .error-msg { display: block; }
+
+    /* ---- PASSWORD ---- */
+    .password-wrapper { position: relative; }
+    .password-toggle {
+      position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--gray-400);
+      padding: 0; line-height: 1;
+    }
+    .password-toggle:hover { color: var(--gray-700); }
+
+    /* ---- LOCATION ---- */
+    .location-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      background: var(--green-50); border: 1.5px solid #22c55e;
+      border-radius: var(--radius); color: var(--green-700);
+      font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all var(--transition);
+    }
+    .location-btn:hover { background: var(--green-100); }
+    .location-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .location-status { font-size: 0.8rem; color: var(--gray-500); margin-top: 0.4rem; min-height: 1.2rem; }
+    .location-status.success { color: var(--green-700); }
+    .location-status.error { color: var(--red-600); }
+
+    /* ---- FILE UPLOAD ---- */
+    .file-upload-label {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.5rem; padding: 1.5rem;
+      border: 2px dashed var(--gray-200); border-radius: var(--radius);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .file-upload-label:hover { border-color: #22c55e; background: var(--green-50); }
+    .file-upload-label i { font-size: 2rem; color: var(--gray-400); }
+    .file-preview-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto; display: block; }
+
+    /* ---- PLAN SUMMARY ---- */
+    .plan-summary-box { background: var(--green-50); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    .plan-summary-box h4 { font-size: 0.9rem; color: var(--green-700); margin-bottom: 0.4rem; }
+    .plan-summary-box p { font-size: 0.85rem; color: var(--gray-700); }
+
+    /* ---- NAVIGATION ---- */
+    .btn-nav { display: flex; gap: 0.75rem; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+    .btn-nav > .spacer { flex: 1; }
+
+    /* ---- ALERTS ---- */
+    .alert {
+      display: none; padding: 0.85rem 1rem; border-radius: var(--radius);
+      font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem;
+    }
+    .alert.error { display: block; background: var(--red-50); color: var(--red-600); border: 1px solid #fecaca; }
+    .alert.success { display: block; background: var(--green-50); color: var(--green-700); border: 1px solid var(--green-200); }
+    .alert-hidden { display: none !important; }
+
+    /* ---- FOOTER LINKS ---- */
+    .terms-text { font-size: 0.8rem; color: var(--gray-500); text-align: center; margin-top: 1rem; }
+    .terms-text a { color: var(--green-700); text-decoration: none; }
+    .login-link { text-align: center; font-size: 0.875rem; color: var(--gray-500); margin-top: 1.5rem; }
+    .login-link a { color: var(--green-700); font-weight: 600; text-decoration: none; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .auth-card { padding: 1.5rem; }
+    }
+    @media (max-width: 400px) {
+      .auth-card { padding: 1.25rem; }
+      .auth-logo img { height: 52px; }
+    }
+  </style>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <a href="/">
+        <img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" />
+      </a>
+    </div>
+
+    <div class="auth-card">
+      <h1>Create Your Account</h1>
+      <p>Join thousands of households using our service</p>
+
+      <!-- Progress Steps -->
+      <div class="progress-steps" id="progressSteps">
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-dot" id="dot2">2</div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-dot" id="dot3">3</div>
+      </div>
+
+      <div id="formAlert" class="alert alert-hidden"></div>
+
+      <form id="registerForm" enctype="multipart/form-data" novalidate>
+
+        <!-- ===== STEP 1: Personal Info ===== -->
+        <div class="form-step active" id="step1">
+          <div class="form-row">
+            <div class="form-group" id="g_fullName">
+              <label for="fullName">Full Name *</label>
+              <input type="text" id="fullName" name="fullName" placeholder="John Doe" autocomplete="name" />
+              <span class="error-msg">Full name must be at least 2 characters</span>
+            </div>
+            <div class="form-group" id="g_phone">
+              <label for="phone">Phone Number *</label>
+              <input type="tel" id="phone" name="phone" placeholder="0244123456" autocomplete="tel" />
+              <span class="error-msg">Enter a valid Ghanaian number (e.g. 0244123456)</span>
+              <small>Format: 0XXXXXXXXX or +233XXXXXXXXX</small>
+            </div>
+          </div>
+          <div class="form-group" id="g_email">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email" />
+            <span class="error-msg">Please enter a valid email address</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group" id="g_password">
+              <label for="password">Password *</label>
+              <div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="Min 8 characters" autocomplete="new-password" />
+                <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show/hide password">
+                  <i class="fas fa-eye" id="eyeIcon"></i>
+                </button>
+              </div>
+              <span class="error-msg">Password must be at least 8 characters</span>
+            </div>
+            <div class="form-group" id="g_binType">
+              <label for="binType">Waste Bin Type *</label>
+              <select id="binType" name="binType">
+                <option value="basic">Basic &mdash; GHS 50/mo (60L)</option>
+                <option value="standard">Standard &mdash; GHS 80/mo (120L)</option>
+                <option value="premium">Premium &mdash; GHS 120/mo (240L)</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-nav">
+            <span class="spacer"></span>
+            <button type="button" class="btn btn-primary" id="next1Btn" onclick="nextStep(1)">
+              Next <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 2: Address & Location ===== -->
+        <div class="form-step" id="step2">
+          <div class="form-group" id="g_address">
+            <label for="residentialAddress">Residential Address *</label>
+            <input type="text" id="residentialAddress" name="residentialAddress" placeholder="e.g. House No. 5, Mfoum, Dunkwa" />
+            <span class="error-msg">Residential address is required</span>
+          </div>
+          <div class="form-group" id="g_route">
+            <label for="collectionRoute">Collection Area / Route *</label>
+            <select id="collectionRoute" name="collectionRoute">
+              <option value="">-- Loading areas... --</option>
+            </select>
+            <span class="error-msg">Please select your collection area</span>
+          </div>
+          <div class="form-group">
+            <label>GPS Location *</label>
+            <button type="button" class="location-btn" id="locationBtn" onclick="captureLocation()">
+              <i class="fas fa-map-marker-alt"></i> Capture My Location
+            </button>
+            <div id="locationStatus" class="location-status"></div>
+            <input type="hidden" id="latitude" name="latitude" />
+            <input type="hidden" id="longitude" name="longitude" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="emergencyName">Emergency Contact Name</label>
+              <input type="text" id="emergencyName" placeholder="Jane Doe" />
+            </div>
+            <div class="form-group">
+              <label for="emergencyPhone">Emergency Contact Phone</label>
+              <input type="tel" id="emergencyPhone" placeholder="0200000001" />
+            </div>
+          </div>
+          <div class="btn-nav">
+            <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="btn btn-primary" id="next2Btn" onclick="nextStep(2)">
+              Next <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== STEP 3: Photo & Submit ===== -->
+        <div class="form-step" id="step3">
+          <div class="form-group">
+            <label>Profile Photo <span style="font-weight:400;color:var(--gray-400)">(Optional)</span></label>
+            <label class="file-upload-label" for="profileImage" id="uploadLabel">
+              <i class="fas fa-camera"></i>
+              <span>Click to upload photo</span>
+              <small style="color:var(--gray-400);">JPG, PNG up to 5MB</small>
+            </label>
+            <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display:none;" />
+          </div>
+
+          <div class="plan-summary-box">
+            <h4><i class="fas fa-info-circle"></i> Plan Summary</h4>
+            <p id="planSummary"></p>
+          </div>
+
+          <div class="terms-text">
+            By registering you agree to our
+            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+          </div>
+
+          <div class="btn-nav" style="margin-top:1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="fas fa-user-plus"></i> Create Account
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <div class="login-link">Already have an account? <a href="/customer/login.html">Sign in</a></div>
+    </div>
+  </div>
+
+  <script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+  <script>
+    let currentStep = 1;
+    let locationCaptured = false;
+
+    // Pre-fill plan from URL param (?plan=basic|standard|premium)
+    const planParam = new URLSearchParams(window.location.search).get('plan');
+    if (planParam && ['basic','standard','premium'].includes(planParam)) {
+      document.getElementById('binType').value = planParam;
+    }
+
+    // ── Routes dropdown ──
+    (async () => {
+      const sel = document.getElementById('collectionRoute');
+      try {
+        const result = await api.getPublicRoutes();
+        const routes = result?.data?.routes || [];
+        if (routes.length === 0) {
+          sel.innerHTML = '<option value="">-- No areas available yet --</option>';
+        } else {
+          sel.innerHTML = '<option value="">-- Select your area --</option>' +
+            routes.map(r => `<option value="${r._id}">${r.name}${r.zone ? ' — ' + r.zone : ''}</option>`).join('');
+        }
+      } catch {
+        sel.innerHTML = '<option value="">-- Could not load areas. Please refresh. --</option>';
+      }
+    })();
+
+    // ── Alert helper ──
+    const showAlert = (msg, type = 'error') => {
+      const el = document.getElementById('formAlert');
+      el.textContent = msg;
+      el.className = `alert ${type}`;
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+    const hideAlert = () => {
+      document.getElementById('formAlert').className = 'alert alert-hidden';
+    };
+
+    // ── Step progress ──
+    const updateProgress = (step) => {
+      [1, 2, 3].forEach(s => {
+        const dot = document.getElementById(`dot${s}`);
+        if (s < step) {
+          dot.className = 'step-dot done';
+          dot.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem"></i>';
+        } else if (s === step) {
+          dot.className = 'step-dot active';
+          dot.textContent = s;
+        } else {
+          dot.className = 'step-dot';
+          dot.textContent = s;
+        }
+      });
+      [1, 2].forEach(s => {
+        document.getElementById(`line${s}`).className = `step-line${s < step ? ' done' : ''}`;
+      });
+    };
+
+    const showStep = (step) => {
+      document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+      currentStep = step;
+      updateProgress(step);
+      hideAlert();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // ── Normalise Ghanaian phone ──
+    const normalisePhone = (raw) => {
+      // Strip spaces, dashes, parentheses
+      let p = raw.replace(/[\s\-().]/g, '');
+      // Convert 233XXXXXXXXX (without +) to +233XXXXXXXXX
+      if (/^233[0-9]{9}$/.test(p)) p = '+' + p;
+      return p;
+    };
+
+    // ── Validation ──
+    const setFieldError = (groupId, hasError) => {
+      document.getElementById(groupId)?.classList.toggle('has-error', hasError);
+    };
+
+    const validateStep1 = () => {
+      const name  = document.getElementById('fullName').value.trim();
+      const phone = normalisePhone(document.getElementById('phone').value);
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+
+      const nameOk  = name.length >= 2;
+      const phoneOk = /^(\+233|0)[0-9]{9}$/.test(phone);
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const passOk  = pass.length >= 8;
+
+      setFieldError('g_fullName', !nameOk);
+      setFieldError('g_phone',    !phoneOk);
+      setFieldError('g_email',    !emailOk);
+      setFieldError('g_password', !passOk);
+
+      if (!nameOk || !phoneOk || !emailOk || !passOk) {
+        showAlert('Please fix the highlighted fields before continuing.');
+        // Scroll to first error
+        const first = document.querySelector('#step1 .form-group.has-error input, #step1 .form-group.has-error select');
+        if (first) first.focus();
+        return false;
+      }
+      return true;
+    };
+
+    const validateStep2 = () => {
+      const addr  = document.getElementById('residentialAddress').value.trim();
+      const route = document.getElementById('collectionRoute').value;
+
+      setFieldError('g_address', !addr);
+      setFieldError('g_route',   !route);
+
+      if (!addr || !route) {
+        showAlert('Please fill in your address and select a collection area.');
+        const first = document.querySelector('#step2 .form-group.has-error input, #step2 .form-group.has-error select');
+        if (first) first.focus();
+        return false;
+      }
+
+      if (!locationCaptured) {
+        const status = document.getElementById('locationStatus');
+        status.textContent = 'Please capture your GPS location before continuing.';
+        status.className = 'location-status error';
+        document.getElementById('locationBtn').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        showAlert('Please capture your GPS location.');
+        return false;
+      }
+      return true;
+    };
+
+    const nextStep = (from) => {
+      if (from === 1 && !validateStep1()) return;
+      if (from === 2 && !validateStep2()) return;
+      if (from === 2) updatePlanSummary();
+      showStep(from + 1);
+    };
+    const prevStep = (from) => { hideAlert(); showStep(from - 1); };
+
+    // ── GPS Capture ──
+    const captureLocation = () => {
+      const btn    = document.getElementById('locationBtn');
+      const status = document.getElementById('locationStatus');
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
+      btn.disabled = true;
+      status.textContent = '';
+      status.className = 'location-status';
+
+      if (!navigator.geolocation) {
+        useDefaultLocation('Geolocation not supported.');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          document.getElementById('latitude').value  = pos.coords.latitude;
+          document.getElementById('longitude').value = pos.coords.longitude;
+          locationCaptured = true;
+          status.textContent = `✔ Location captured (${pos.coords.latitude.toFixed(4)}°, ${pos.coords.longitude.toFixed(4)}°)`;
+          status.className = 'location-status success';
+          btn.innerHTML = '<i class="fas fa-check-circle"></i> Location Captured';
+          btn.disabled = false;
+          hideAlert();
+        },
+        (err) => {
+          useDefaultLocation(`Could not detect location: ${err.message}`);
+        },
+        { timeout: 12000, enableHighAccuracy: true }
+      );
+    };
+
+    const useDefaultLocation = (reason) => {
+      // Default: Dunkwa-on-Offin town centre
+      document.getElementById('latitude').value  = '5.9634';
+      document.getElementById('longitude').value = '-1.7816';
+      locationCaptured = true;
+      const status = document.getElementById('locationStatus');
+      status.textContent = '⚠️ Using default location (Dunkwa-on-Offin). You can update this later in your profile.';
+      status.className = 'location-status';
+      const btn = document.getElementById('locationBtn');
+      btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Try Again';
+      btn.disabled = false;
+    };
+
+    // Auto-capture GPS when step 2 is first entered
+    let locationAttempted = false;
+    const originalShowStep = showStep;
+
+    // ── Plan Summary ──
+    const updatePlanSummary = () => {
+      const plans = {
+        basic:    { name: 'Basic',    price: 50,  size: '60L bin',  freq: 'Weekly collection' },
+        standard: { name: 'Standard', price: 80,  size: '120L bin', freq: 'Twice-weekly collection' },
+        premium:  { name: 'Premium',  price: 120, size: '240L bin', freq: 'Daily collection' },
+      };
+      const p = plans[document.getElementById('binType').value] || plans.basic;
+      document.getElementById('planSummary').innerHTML =
+        `<strong>${p.name} Plan</strong> &mdash; GHS ${p.price}/month<br>${p.size} &bull; ${p.freq}`;
+    };
+
+    // Intercept showStep to auto-trigger GPS on step 2
+    const _showStep = showStep;
+    // Redefine nextStep to hook into step 2 entry
+    const _origNext = nextStep;
+    // Override the next button for step 1 to also trigger GPS
+    document.getElementById('next1Btn').addEventListener('click', () => {
+      // Auto-start GPS capture when entering step 2 (after validation passes)
+      // This is handled inside the form flow — we trigger after showStep(2)
+    });
+
+    // Patch: after showStep(2), auto-trigger location if not yet attempted
+    const patchedNext = (from) => {
+      if (from === 1 && !validateStep1()) return;
+      if (from === 2 && !validateStep2()) return;
+      if (from === 2) updatePlanSummary();
+      showStep(from + 1);
+      // Auto-capture GPS when arriving at step 2
+      if (from === 1 && !locationAttempted) {
+        locationAttempted = true;
+        setTimeout(captureLocation, 400);
+      }
+    };
+
+    // Re-wire onclick to use patchedNext
+    document.getElementById('next1Btn').onclick = () => patchedNext(1);
+    document.getElementById('next2Btn').onclick = () => patchedNext(2);
+
+    // ── Password toggle ──
+    const togglePassword = () => {
+      const input = document.getElementById('password');
+      const icon  = document.getElementById('eyeIcon');
+      input.type  = input.type === 'password' ? 'text' : 'password';
+      icon.className = `fas fa-eye${input.type === 'password' ? '' : '-slash'}`;
+    };
+
+    // ── Photo preview ──
+    document.getElementById('profileImage').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('uploadLabel').innerHTML =
+          `<img src="${ev.target.result}" class="file-preview-img" alt="Preview">
+           <span style="font-size:0.8rem;color:var(--green-700);margin-top:0.25rem;">Photo selected ✓</span>`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // ── Form Submit ──
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+      submitBtn.disabled = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('fullName',           document.getElementById('fullName').value.trim());
+        formData.append('email',              document.getElementById('email').value.trim().toLowerCase());
+        formData.append('phone',              normalisePhone(document.getElementById('phone').value));
+        formData.append('password',           document.getElementById('password').value);
+        formData.append('residentialAddress', document.getElementById('residentialAddress').value.trim());
+        formData.append('latitude',           document.getElementById('latitude').value);
+        formData.append('longitude',          document.getElementById('longitude').value);
+        formData.append('binType',            document.getElementById('binType').value);
+
+        const routeVal = document.getElementById('collectionRoute').value;
+        if (routeVal) formData.append('collectionRoute', routeVal);
+
+        const emergencyName  = document.getElementById('emergencyName').value.trim();
+        const emergencyPhone = document.getElementById('emergencyPhone').value.trim();
+        if (emergencyName || emergencyPhone) {
+          formData.append('emergencyContact', JSON.stringify({ name: emergencyName, phone: emergencyPhone }));
+        }
+
+        const photo = document.getElementById('profileImage').files[0];
+        if (photo) formData.append('profileImage', photo);
+
+        const result = await api.register(formData);
+        saveAuthState(result);
+        window.location.href = '/customer/dashboard.html';
+      } catch (err) {
+        let msg = err.message || 'Registration failed. Please try again.';
+        if (err.errors?.length) {
+          msg = err.errors.map(e => e.message || e.msg).filter(Boolean).join(' • ');
+        }
+        showAlert(msg);
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Dashboard | 035 F Arkoh Waste Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="/customer/dashboard.html" class="sidebar-logo">
+          <img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" />
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="/customer/dashboard.html" class="nav-item active">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+          <a href="/customer/collections.html" class="nav-item">
+            <i class="fas fa-truck"></i> Collections
+          </a>
+          <a href="/customer/invoices.html" class="nav-item">
+            <i class="fas fa-file-invoice"></i> Invoices
+          </a>
+          <a href="/customer/payments.html" class="nav-item">
+            <i class="fas fa-credit-card"></i> Payments
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="/customer/notifications.html" class="nav-item">
+            <i class="fas fa-bell"></i> Notifications
+            <span class="nav-badge" id="notifBadge" style="display:none">0</span>
+          </a>
+          <a href="/customer/complaints.html" class="nav-item">
+            <i class="fas fa-comment-alt"></i> Complaints
+          </a>
+          <a href="/customer/profile.html" class="nav-item">
+            <i class="fas fa-user-circle"></i> Profile
+          </a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="sidebarAvatar">?</div>
+          <div class="user-details">
+            <div class="user-name" id="sidebarName">Loading...</div>
+            <div class="user-role">Customer</div>
+          </div>
+          <button class="logout-btn" title="Logout" onclick="doLogout()">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <button class="topbar-btn sidebar-toggle" id="sidebarToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="topbar-title">Dashboard</span>
+        <div class="topbar-actions">
+          <button class="topbar-btn" data-theme-toggle title="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="topbar-btn" id="notifBtn" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="badge-dot" id="notifDot" style="display:none"></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- Welcome -->
+        <div class="page-header">
+          <div>
+            <h1 id="welcomeMsg">Welcome back!</h1>
+            <p>Here's your waste collection overview</p>
+          </div>
+          <div>
+            <a href="/customer/invoices.html" id="payNowBtn" class="btn btn-primary" style="display:none">
+              <i class="fas fa-credit-card"></i> Pay Now
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+          <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+          <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+          <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        </div>
+
+        <div class="grid-2" style="gap:1.5rem;margin-top:1.5rem">
+          <!-- Current Invoice -->
+          <div class="card" id="invoiceCard">
+            <div class="card-header">
+              <span class="card-title">Current Invoice</span>
+              <span id="invoiceMonth" class="badge badge-secondary"></span>
+            </div>
+            <div class="card-body" id="invoiceBody">
+              <div class="skeleton" style="height:120px"></div>
+            </div>
+          </div>
+
+          <!-- Collection Schedule -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Service Info</span>
+            </div>
+            <div class="card-body" id="serviceInfo">
+              <div class="skeleton" style="height:120px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Collections -->
+        <div class="card" style="margin-top:1.5rem">
+          <div class="card-header">
+            <span class="card-title">Recent Collections</span>
+            <a href="/customer/collections.html" class="btn btn-sm btn-outline">View All</a>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Driver</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="collectionsTable">
+                <tr><td colspan="4"><div class="skeleton" style="height:40px;margin:0.5rem"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="card" style="margin-top:1.5rem">
+          <div class="card-header">
+            <span class="card-title">My Location</span>
+            <button class="btn btn-sm btn-outline" onclick="updateMyLocation()">
+              <i class="fas fa-map-marker-alt"></i> Update
+            </button>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div id="map" style="height:300px;border-radius:0 0 12px 12px;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+  <script src="/js/utils.js?v=7"></script>
+  <script>
+    const user = requireAuth(['customer']);
+    if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+
+    initSidebar();
+    initTheme();
+    populateSidebarUser(user);
+    document.getElementById('welcomeMsg').textContent = `Welcome back, ${user.fullName.split(' ')[0]}!`;
+
+    let map = null;
+
+    const loadDashboard = async () => {
+      try {
+        const { data } = await api.getCustomerDashboard();
+        const { stats, customer, currentInvoice } = data;
+
+        // Stats
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="stat-info">
+              <div class="stat-value">${formatCurrency(stats.totalPaid)}</div>
+              <div class="stat-label">Total Paid</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon ${stats.outstandingBalance > 0 ? 'red' : 'green'}"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="stat-info">
+              <div class="stat-value">${formatCurrency(stats.outstandingBalance)}</div>
+              <div class="stat-label">Outstanding Balance</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-truck"></i></div>
+            <div class="stat-info">
+              <div class="stat-value">${stats.collectionRate}%</div>
+              <div class="stat-label">Collection Rate</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow"><i class="fas fa-bell"></i></div>
+            <div class="stat-info">
+              <div class="stat-value">${stats.unreadNotifications}</div>
+              <div class="stat-label">Notifications</div>
+            </div>
+          </div>
+        `;
+
+        // Notification badge
+        if (stats.unreadNotifications > 0) {
+          document.getElementById('notifBadge').textContent = stats.unreadNotifications;
+          document.getElementById('notifBadge').style.display = 'inline-flex';
+          document.getElementById('notifDot').style.display = 'block';
+        }
+
+        // Pay now button
+        if (stats.outstandingBalance > 0) {
+          document.getElementById('payNowBtn').style.display = 'flex';
+        }
+
+        // Current invoice
+        const invBody = document.getElementById('invoiceBody');
+        if (currentInvoice) {
+          document.getElementById('invoiceMonth').textContent = `${monthNames[currentInvoice.month - 1]} ${currentInvoice.year}`;
+          invBody.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+              <div>
+                <div style="font-size:2rem;font-weight:800;color:#0f172a">${formatCurrency(currentInvoice.totalAmount || currentInvoice.amount)}</div>
+                <div style="font-size:0.8rem;color:#64748b">${currentInvoice.invoiceNumber}</div>
+              </div>
+              ${statusBadge(currentInvoice.status)}
+            </div>
+            <div style="font-size:0.85rem;color:#64748b">Due: ${formatDate(currentInvoice.dueDate)}</div>
+            ${currentInvoice.status !== 'paid' ? `
+              <a href="/customer/invoices.html" class="btn btn-primary btn-full" style="margin-top:1rem">
+                <i class="fas fa-credit-card"></i> Pay Now
+              </a>
+            ` : `<div class="badge badge-success" style="margin-top:0.5rem"><i class="fas fa-check"></i> Paid on ${formatDate(currentInvoice.paidDate)}</div>`}
+          `;
+        } else {
+          invBody.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-file-invoice"></i></div><div class="empty-title">No invoice this month</div></div>`;
+        }
+
+        // Service info
+        document.getElementById('serviceInfo').innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.875rem">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-id-card" style="color:#16a34a;width:16px"></i>
+              <span style="color:#64748b">Customer ID:</span>
+              <strong>${customer.customerId || 'N/A'}</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas fa-trash-alt" style="color:#16a34a;width:16px"></i>
+              <span style="color:#64748b">Bin Type:</span>
+              <strong>${(customer.binType || 'basic').toUpperCase()}</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas fa-calendar" style="color:#16a34a;width:16px"></i>
+              <span style="color:#64748b">Collection Day:</span>
+              <strong>${(customer.collectionSchedule?.day || 'Monday').toUpperCase()}</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas fa-user-hard-hat" style="color:#16a34a;width:16px"></i>
+              <span style="color:#64748b">Driver:</span>
+              <strong>${customer.assignedDriver?.user?.fullName || 'Not assigned yet'}</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas fa-clock" style="color:#16a34a;width:16px"></i>
+              <span style="color:#64748b">Last Pickup:</span>
+              <strong>${formatDate(stats.lastCollectionDate)}</strong>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="fas fa-calendar-check" style="color:#16a34a;width:16px"></i>
+              <span style="color:#64748b">Next Pickup:</span>
+              <strong>${formatDate(stats.nextCollectionDate)}</strong>
+            </div>
+          </div>
+        `;
+
+        // Initialize map
+        const coords = customer.location?.coordinates || [-0.187, 5.6037];
+        initMap(coords[1], coords[0]);
+
+      } catch (err) {
+        Toast.error('Error', err.message);
+      }
+    };
+
+    const loadCollections = async () => {
+      try {
+        const { data } = await api.getMyCollections('?limit=5');
+        const tbody = document.getElementById('collectionsTable');
+        if (!data?.length) {
+          tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon"><i class="fas fa-truck"></i></div><div class="empty-title">No collections yet</div></div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map((c) => `
+          <tr>
+            <td>${formatDate(c.scheduledDate)}</td>
+            <td>${statusBadge(c.status)}</td>
+            <td>${c.driver?.user?.fullName || 'N/A'}</td>
+            <td>${c.notes || (c.missedReason ? c.missedReason.replace(/_/g, ' ') : '&mdash;')}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        document.getElementById('collectionsTable').innerHTML = `<tr><td colspan="4" class="text-muted">Failed to load</td></tr>`;
+      }
+    };
+
+    const initMap = (lat, lng) => {
+      if (map) return;
+      map = L.map('map').setView([lat, lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Â© OpenStreetMap contributors',
+      }).addTo(map);
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="background:#16a34a;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      });
+      L.marker([lat, lng], { icon }).addTo(map).bindPopup('Your Location').openPopup();
+    };
+
+    const updateMyLocation = () => {
+      if (!navigator.geolocation) return Toast.error('Error', 'Geolocation not supported');
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          await api.updateLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude, address: 'Updated location' });
+          Toast.success('Updated', 'Location updated successfully');
+          if (map) {
+            map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+          }
+        } catch (err) {
+          Toast.error('Error', err.message);
+        }
+      });
+    };
+
+    document.getElementById('notifBtn').addEventListener('click', () => {
+      window.location.href = '/customer/notifications.html';
+    });
+
+    // Load all
+    loadDashboard();
+    loadCollections();
+  </script>
+</body>
+</html>

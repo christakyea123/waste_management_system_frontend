@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complaints | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item active"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarName">Admin</div>
+          <div class="user-role" id="sidebarRole">Administrator</div>
+        </div>
+        <button class="logout-btn" title="Logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Complaints</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle title="Toggle theme"><i class="fas fa-moon"></i></button>
+        <button class="topbar-btn" onclick="loadComplaints()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Customer Complaints</h1><p>Review and resolve customer issues</p></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="complaintStats" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">All Complaints</h3>
+        </div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" id="searchInput" placeholder="Search ticket #, customer..." class="search-input" oninput="filterComplaints()" />
+            </div>
+            <select id="statusFilter" class="form-control" style="padding:0.5rem 0.75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit" onchange="loadComplaints()">
+              <option value="">All Status</option>
+              <option value="open">Open</option>
+              <option value="in_review">In Review</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+            <select id="categoryFilter" class="form-control" style="padding:0.5rem 0.75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit" onchange="loadComplaints()">
+              <option value="">All Categories</option>
+              <option value="missed_collection">Missed Collection</option>
+              <option value="billing_issue">Billing Issue</option>
+              <option value="driver_conduct">Driver Conduct</option>
+              <option value="service_quality">Service Quality</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket #</th>
+                <th>Customer</th>
+                <th>Category</th>
+                <th>Subject</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="complaintsTbody"><tr><td colspan="8" class="text-center"><div class="skeleton" style="height:40px;margin:0.5rem 0"></div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="card-footer" id="pagination" style="display:none"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Resolve Modal -->
+<div class="modal-overlay" id="resolveModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="resolveModalTitle">Update Complaint</h3>
+      <button class="modal-close" onclick="closeModal('resolveModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="resolveComplaintId" />
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="resolveStatus" class="form-control">
+          <option value="open">Open</option>
+          <option value="in_review">In Review</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select id="resolvePriority" class="form-control">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Resolution Note</label>
+        <textarea id="resolveNote" class="form-control" rows="4" placeholder="Describe how this complaint was resolved..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('resolveModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveResolution()"><i class="fas fa-check"></i> Update</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin', 'superadmin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  let allComplaints = [];
+  let currentPage = 1;
+
+  window._statusBadge = (s) => ({
+    open: '<span class="badge badge-danger">Open</span>',
+    in_review: '<span class="badge badge-warning">In Review</span>',
+    resolved: '<span class="badge badge-success">Resolved</span>',
+    closed: '<span class="badge badge-secondary">Closed</span>',
+  })[s] || s;
+
+  const priorityBadge = (p) => ({
+    low: '<span class="badge badge-info">Low</span>',
+    medium: '<span class="badge badge-warning">Medium</span>',
+    high: '<span class="badge badge-danger">High</span>',
+  })[p] || p;
+
+  const categoryLabel = (c) => ({
+    missed_collection: 'Missed Collection',
+    billing_issue: 'Billing Issue',
+    driver_conduct: 'Driver Conduct',
+    service_quality: 'Service Quality',
+    other: 'Other',
+  })[c] || c;
+
+  const loadComplaints = async () => {
+    const status = document.getElementById('statusFilter').value;
+    const category = document.getElementById('categoryFilter').value;
+    let params = `?page=${currentPage}&limit=20`;
+    if (status) params += `&status=${status}`;
+    if (category) params += `&category=${category}`;
+
+    try {
+      const res = await api.getAdminComplaints(params);
+      allComplaints = res.data;
+      renderComplaints(allComplaints);
+      updateStats(allComplaints);
+
+      if (res.pagination && res.pagination.pages > 1) {
+        document.getElementById('pagination').style.display = 'block';
+        document.getElementById('pagination').innerHTML = `
+          Page ${res.pagination.page} of ${res.pagination.pages} &nbsp;
+          <button class="btn btn-sm btn-outline" onclick="changePage(-1)" ${res.pagination.page <= 1 ? 'disabled' : ''}>â€¹ Prev</button>
+          <button class="btn btn-sm btn-outline" onclick="changePage(1)" ${res.pagination.page >= res.pagination.pages ? 'disabled' : ''}>Next â€º</button>
+        `;
+      }
+    } catch (e) {
+      document.getElementById('complaintsTbody').innerHTML = '<tr><td colspan="8" class="text-center" style="color:#ef4444">Failed to load complaints</td></tr>';
+    }
+  };
+
+  const renderComplaints = (complaints) => {
+    if (!complaints.length) {
+      document.getElementById('complaintsTbody').innerHTML = '<tr><td colspan="8" class="text-center" style="color:#94a3b8;padding:2rem">No complaints found</td></tr>';
+      return;
+    }
+    document.getElementById('complaintsTbody').innerHTML = complaints.map(c => `
+      <tr>
+        <td><code style="font-size:0.8rem">${c.ticketNumber}</code></td>
+        <td>
+          <div style="font-weight:600">${c.customer?.user?.fullName || 'N/A'}</div>
+          <div style="font-size:0.78rem;color:#94a3b8">${c.customer?.user?.phone || ''}</div>
+        </td>
+        <td style="font-size:0.85rem">${categoryLabel(c.category)}</td>
+        <td style="max-width:200px;font-size:0.85rem">${c.subject}</td>
+        <td>${priorityBadge(c.priority)}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td style="font-size:0.8rem;color:#64748b">${formatDate(c.createdAt)}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick='openResolve(${JSON.stringify(c)})'>
+            <i class="fas fa-edit"></i> Update
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  };
+
+  const updateStats = (complaints) => {
+    const open = complaints.filter(c => c.status === 'open').length;
+    const inReview = complaints.filter(c => c.status === 'in_review').length;
+    const resolved = complaints.filter(c => c.status === 'resolved').length;
+    const high = complaints.filter(c => c.priority === 'high').length;
+    document.getElementById('complaintStats').innerHTML = `
+      <div class="stat-card"><div class="stat-icon red"><i class="fas fa-exclamation-circle"></i></div><div class="stat-info"><div class="stat-value">${open}</div><div class="stat-label">Open</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-value">${inReview}</div><div class="stat-label">In Review</div></div></div>
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><div class="stat-value">${resolved}</div><div class="stat-label">Resolved</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-fire"></i></div><div class="stat-info"><div class="stat-value">${high}</div><div class="stat-label">High Priority</div></div></div>
+    `;
+  };
+
+  const filterComplaints = () => {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allComplaints.filter(c =>
+      c.ticketNumber?.toLowerCase().includes(q) ||
+      c.customer?.user?.fullName?.toLowerCase().includes(q) ||
+      c.subject?.toLowerCase().includes(q)
+    );
+    renderComplaints(filtered);
+  };
+
+  const openResolve = (c) => {
+    document.getElementById('resolveComplaintId').value = c._id;
+    document.getElementById('resolveModalTitle').textContent = `Complaint: ${c.ticketNumber}`;
+    document.getElementById('resolveStatus').value = c.status;
+    document.getElementById('resolvePriority').value = c.priority;
+    document.getElementById('resolveNote').value = c.resolution || '';
+    openModal('resolveModal');
+  };
+
+  const saveResolution = async () => {
+    const id = document.getElementById('resolveComplaintId').value;
+    const status = document.getElementById('resolveStatus').value;
+    const priority = document.getElementById('resolvePriority').value;
+    const resolution = document.getElementById('resolveNote').value.trim();
+    try {
+      await api.updateAdminComplaint(id, { status, priority, resolution });
+      showToast('Complaint updated successfully', 'success');
+      closeModal('resolveModal');
+      loadComplaints();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  const changePage = (dir) => { currentPage += dir; loadComplaints(); };
+
+  loadComplaints();
+</script>
+</body>
+</html>

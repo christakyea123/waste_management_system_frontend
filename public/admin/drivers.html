@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drivers | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=8" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item active"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Admin</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Driver Management</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Drivers</h1><p id="driverCount">Loading...</p></div>
+        <button class="btn btn-primary" id="addDriverOpenBtn"><i class="fas fa-plus"></i> Add Driver</button>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-body" style="padding:1rem">
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" class="form-control" id="searchInput" placeholder="Search drivers..." />
+            </div>
+            <select class="form-control" id="statusFilter" style="width:140px">
+              <option value="">All Status</option>
+              <option value="available">Available</option>
+              <option value="on_route">On Route</option>
+              <option value="off_duty">Off Duty</option>
+              <option value="suspended">Suspended</option>
+            </select>
+            <button class="btn btn-secondary" id="filterBtn"><i class="fas fa-filter"></i> Filter</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Driver</th>
+                <th class="hide-sm">Driver ID</th>
+                <th class="hide-sm">Phone</th>
+                <th class="hide-md">Truck</th>
+                <th class="hide-md">Zone</th>
+                <th>Status</th>
+                <th class="hide-sm">Customers</th>
+                <th class="hide-md">Performance</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="driversTable">
+              <tr><td colspan="9"><div class="skeleton" style="height:40px;margin:0.5rem 1rem"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer" id="paginationContainer"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Edit Driver Modal -->
+<div class="modal-overlay" id="editDriverModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title">Edit Driver</span>
+      <button class="modal-close" onclick="closeModal('editDriverModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editDriverId" />
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" id="editDriverName" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="text" class="form-control" id="editDriverPhone" />
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Truck Number</label>
+          <input type="text" class="form-control" id="editDriverTruck" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">License Number</label>
+          <input type="text" class="form-control" id="editDriverLicense" />
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Zone</label>
+          <input type="text" class="form-control" id="editDriverZone" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="editDriverStatus">
+            <option value="available">Available</option>
+            <option value="on_route">On Route</option>
+            <option value="off_duty">Off Duty</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+      </div>
+      <div class="submit-error" id="editDriverError" style="display:none;background:#fef2f2;color:#dc2626;padding:0.75rem;border-radius:8px;font-size:0.875rem;margin-top:0.5rem"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editDriverModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveDriverBtn"><i class="fas fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Driver Modal -->
+<div class="modal-overlay" id="addDriverModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title">Add New Driver</span>
+      <button class="modal-close" onclick="closeModal('addDriverModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="addDriverForm" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-control" name="fullName" placeholder="John Doe" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone *</label>
+            <input type="tel" class="form-control" name="phone" placeholder="0244123456" pattern="^(\+233|0)[0-9]{9}$" title="Ghana number: starts with 0 or +233, 10 digits total (e.g. 0244123456)" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-control" name="email" placeholder="driver@example.com" required />
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" class="form-control" name="password" placeholder="Min 8 characters" minlength="8" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Truck Number *</label>
+            <input type="text" class="form-control" name="truckNumber" placeholder="GH-1234-20" required />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">License Number</label>
+            <input type="text" class="form-control" name="licenseNumber" placeholder="GHA-DL-12345" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone</label>
+            <input type="text" class="form-control" name="zone" placeholder="e.g. Zone A" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profile Photo</label>
+          <input type="file" class="form-control" name="profileImage" accept="image/*" />
+        </div>
+      </form>
+      <div class="submit-error" id="driverError" style="display:none;background:#fef2f2;color:#dc2626;padding:0.75rem;border-radius:8px;font-size:0.875rem;margin-top:0.5rem"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addDriverModal')">Cancel</button>
+      <button class="btn btn-primary" id="addDriverBtn"><i class="fas fa-plus"></i> Add Driver</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  // Surface unexpected errors so the page never appears "stuck loading" silently.
+  window.addEventListener('error', (e) => console.error('[drivers]', e.message, e.error));
+  window.addEventListener('unhandledrejection', (e) => console.error('[drivers] unhandled rejection:', e.reason));
+
+  // Fail loud if our globals never loaded (broken cache, network drop, etc.)
+  if (typeof requireAuth !== 'function' || typeof populateSidebarUser !== 'function') {
+    document.getElementById('driverCount').textContent =
+      'Page assets failed to load. Please hard-refresh (Ctrl+Shift+R).';
+    throw new Error('Core scripts (api.js / utils.js) not loaded');
+  }
+
+  const user = requireAuth(['admin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  let currentPage = 1;
+
+  const loadDrivers = async (page = 1) => {
+    currentPage = page;
+    const search = document.getElementById('searchInput').value;
+    const status = document.getElementById('statusFilter').value;
+    let params = `?page=${page}&limit=15`;
+    if (search) params += `&search=${encodeURIComponent(search)}`;
+    if (status) params += `&status=${status}`;
+
+    try {
+      const res = await api.getDrivers(params);
+      const { data, pagination } = res;
+      document.getElementById('driverCount').textContent = `${pagination.total} drivers total`;
+
+      const tbody = document.getElementById('driversTable');
+      if (!data?.length) {
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon"><i class="fas fa-id-card"></i></div><div class="empty-title">No drivers found</div></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map((d) => {
+        const perfRate = d.totalCollections > 0
+          ? Math.round(((d.totalCollections - d.missedCollections) / d.totalCollections) * 100)
+          : 100;
+        return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.65rem">
+                ${d.user?.profileImage
+                  ? `<img src="${d.user.profileImage}" class="avatar avatar-sm" style="object-fit:cover;width:30px;height:30px;border-radius:50%" />`
+                  : `<div class="avatar avatar-sm">${getInitials(d.user?.fullName)}</div>`}
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">${d.user?.fullName || 'N/A'}</div>
+                  <div style="font-size:0.75rem;color:#64748b">${d.user?.email || ''}</div>
+                </div>
+              </div>
+            </td>
+            <td class="hide-sm"><span class="badge badge-info">${d.driverId}</span></td>
+            <td class="hide-sm">${d.user?.phone || 'N/A'}</td>
+            <td class="hide-md">${d.truckNumber || '—'}</td>
+            <td class="hide-md">${d.zone || '—'}</td>
+            <td>${statusBadge(d.status)}</td>
+            <td class="hide-sm"><strong>${d.assignedCustomers?.length || 0}</strong></td>
+            <td class="hide-md">
+              <div style="display:flex;align-items:center;gap:0.4rem">
+                <div style="width:60px;height:6px;background:#e2e8f0;border-radius:3px;">
+                  <div style="width:${perfRate}%;height:100%;background:${perfRate >= 90 ? '#16a34a' : perfRate >= 70 ? '#eab308' : '#ef4444'};border-radius:3px"></div>
+                </div>
+                <span style="font-size:0.8rem;font-weight:600">${perfRate}%</span>
+              </div>
+            </td>
+            <td>
+              <div style="display:flex;gap:0.4rem">
+                <button class="btn btn-sm btn-outline" onclick="editDriver('${d._id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                ${user.role === 'superadmin' ? `<button class="btn btn-sm btn-danger" onclick="deleteDriver('${d._id}')" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const paginationContainer = document.getElementById('paginationContainer');
+      paginationContainer.innerHTML = '';
+      if (pagination.pages > 1) paginationContainer.appendChild(renderPagination(pagination, loadDrivers));
+
+    } catch (err) {
+      console.error('[drivers] loadDrivers failed:', err);
+      document.getElementById('driverCount').textContent = 'Failed to load drivers';
+      document.getElementById('driversTable').innerHTML =
+        `<tr><td colspan="9" style="padding:1.5rem;text-align:center;color:#dc2626">
+           <i class="fas fa-exclamation-triangle"></i> ${err.message || 'Request failed'}
+         </td></tr>`;
+      Toast.error('Error', err.message);
+    }
+  };
+
+  const openAddDriverModal = () => {
+    document.getElementById('addDriverForm').reset();
+    document.getElementById('driverError').style.display = 'none';
+    openModal('addDriverModal');
+  };
+
+  const addDriver = async () => {
+    const btn = document.getElementById('addDriverBtn');
+    const errorDiv = document.getElementById('driverError');
+    errorDiv.style.display = 'none';
+
+    const form = document.getElementById('addDriverForm');
+    if (!form.reportValidity()) return; // surfaces native pattern/minlength messages
+
+    setButtonLoading(btn, true, 'Adding...');
+
+    try {
+      const formData = new FormData(form);
+      // Strip empty file input so multer doesn't see a zero-byte part
+      const file = formData.get('profileImage');
+      if (file instanceof File && file.size === 0) formData.delete('profileImage');
+
+      await api.createDriver(formData);
+      Toast.success('Driver Added', 'New driver account created successfully');
+      closeModal('addDriverModal');
+      loadDrivers(1);
+    } catch (err) {
+      const detail = Array.isArray(err.errors) && err.errors.length
+        ? err.errors.map((e) => `${e.field}: ${e.message}`).join(' • ')
+        : err.message || 'Request failed';
+      errorDiv.textContent = detail;
+      errorDiv.style.display = 'block';
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  const editDriver = async (id) => {
+    document.getElementById('editDriverId').value = id;
+    document.getElementById('editDriverError').style.display = 'none';
+    openModal('editDriverModal');
+    try {
+      const { data } = await api.getDriver(id);
+      const { driver } = data;
+      document.getElementById('editDriverName').value = driver.user?.fullName || '';
+      document.getElementById('editDriverPhone').value = driver.user?.phone || '';
+      document.getElementById('editDriverTruck').value = driver.truckNumber || '';
+      document.getElementById('editDriverLicense').value = driver.licenseNumber || '';
+      document.getElementById('editDriverZone').value = driver.zone || '';
+      document.getElementById('editDriverStatus').value = driver.status || 'available';
+    } catch (err) {
+      Toast.error('Error', err.message);
+      closeModal('editDriverModal');
+    }
+  };
+
+  const saveDriver = async () => {
+    const id = document.getElementById('editDriverId').value;
+    const btn = document.getElementById('saveDriverBtn');
+    const errorDiv = document.getElementById('editDriverError');
+    errorDiv.style.display = 'none';
+    setButtonLoading(btn, true, 'Saving...');
+    try {
+      await api.updateDriver(id, {
+        fullName: document.getElementById('editDriverName').value,
+        phone: document.getElementById('editDriverPhone').value,
+        truckNumber: document.getElementById('editDriverTruck').value,
+        licenseNumber: document.getElementById('editDriverLicense').value,
+        zone: document.getElementById('editDriverZone').value,
+        status: document.getElementById('editDriverStatus').value,
+      });
+      Toast.success('Saved', 'Driver updated successfully');
+      closeModal('editDriverModal');
+      loadDrivers(currentPage);
+    } catch (err) {
+      errorDiv.textContent = err.message;
+      errorDiv.style.display = 'block';
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  const deleteDriver = async (id) => {
+    if (!confirm('Delete this driver?')) return;
+    try {
+      await api.deleteDriver(id);
+      Toast.success('Deleted', 'Driver removed');
+      loadDrivers(currentPage);
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+
+
+  // Helper: safely bind an event without halting the script if the node is missing.
+  const safeBind = (sel, ev, fn) => {
+    const el = typeof sel === 'string' ? document.getElementById(sel) : sel;
+    if (el) el.addEventListener(ev, fn);
+    else console.warn(`[drivers] missing element: ${sel}`);
+  };
+
+  // ── Run data load FIRST so the table shows results even if a later
+  //    listener binding throws for any reason. ────────────────────────
+  loadDrivers(1).catch((err) => console.error('[drivers] initial load failed:', err));
+
+  // Now wire up the rest, each in isolation so one bad node can't kill the page.
+  document.querySelectorAll('.modal-overlay').forEach((o) =>
+    o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('open'); }));
+
+  safeBind('searchInput', 'keydown', (e) => { if (e.key === 'Enter') loadDrivers(1); });
+  safeBind('addDriverOpenBtn', 'click', openAddDriverModal);
+  safeBind('filterBtn',        'click', () => loadDrivers(1));
+  safeBind('addDriverBtn',     'click', addDriver);
+  safeBind('saveDriverBtn',    'click', saveDriver);
+
+  // Also expose for any remaining inline handlers (modal close, dynamic row actions).
+  Object.assign(window, {
+    loadDrivers, openAddDriverModal, addDriver, editDriver, saveDriver, deleteDriver,
+    openModal, closeModal,
+  });
+</script>
+</body>
+</html>

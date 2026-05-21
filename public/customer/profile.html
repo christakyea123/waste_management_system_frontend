@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile | 035 F Arkoh Waste Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/customer/dashboard.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="/customer/dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/customer/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/customer/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/customer/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Account</div>
+        <a href="/customer/notifications.html" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+        <a href="/customer/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+        <a href="/customer/profile.html" class="nav-item active"><i class="fas fa-user-circle"></i> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Loading...</div><div class="user-role">Customer</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">My Profile</span>
+      <div class="topbar-actions"><button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Profile</h1><p>Manage your account details</p></div>
+      </div>
+
+      <div class="grid-2" style="gap:1.5rem">
+        <!-- Profile Card -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Account Info</span></div>
+          <div class="card-body" style="text-align:center;padding-bottom:0.5rem">
+            <div style="position:relative;display:inline-block;margin-bottom:1rem">
+              <img id="profileImg" src="" alt="Profile"
+                style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #16a34a;display:none" />
+              <div id="profileInitials"
+                style="width:100px;height:100px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;margin:0 auto">
+                ?
+              </div>
+              <label style="position:absolute;bottom:0;right:0;width:30px;height:30px;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">
+                <i class="fas fa-camera" style="font-size:0.75rem"></i>
+                <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="uploadPhoto(this)" />
+              </label>
+            </div>
+            <div id="profileName" style="font-size:1.25rem;font-weight:700">Loading...</div>
+            <div id="profileCustomerId" style="font-size:0.85rem;color:#64748b;margin-bottom:0.5rem"></div>
+            <div id="profileStatus"></div>
+          </div>
+
+          <div class="card-body" id="profileDetails">
+            <div class="skeleton" style="height:120px"></div>
+          </div>
+        </div>
+
+        <!-- Edit Forms -->
+        <div style="display:flex;flex-direction:column;gap:1.5rem">
+          <!-- Update Profile -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Update Profile</span></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="fullName" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Residential Address</label>
+                <textarea class="form-control" id="address" rows="2"></textarea>
+              </div>
+              <button class="btn btn-primary btn-full" id="updateProfileBtn" onclick="updateProfile()">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </div>
+          </div>
+
+          <!-- Change Password -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Change Password</span></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" class="form-control" id="currentPassword" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" class="form-control" id="newPassword" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirmPassword" />
+              </div>
+              <button class="btn btn-secondary btn-full" id="changePwdBtn" onclick="changePassword()">
+                <i class="fas fa-key"></i> Update Password
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['customer']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  let customerData = null;
+
+  const loadProfile = async () => {
+    try {
+      const { data } = await api.getCustomerDashboard();
+      const { customer } = data;
+      customerData = customer;
+      const u = customer.user;
+
+      // Profile card
+      const initials = (u.fullName || '?').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0,2);
+      document.getElementById('profileInitials').textContent = initials;
+      document.getElementById('profileName').textContent = u.fullName;
+      document.getElementById('profileCustomerId').textContent = customer.customerId;
+      document.getElementById('profileStatus').innerHTML = statusBadge(customer.accountStatus);
+
+      if (u.profileImage) {
+        document.getElementById('profileImg').src = u.profileImage;
+        document.getElementById('profileImg').style.display = 'block';
+        document.getElementById('profileInitials').style.display = 'none';
+      }
+
+      document.getElementById('profileDetails').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:0.6rem;font-size:0.875rem;margin-top:0.5rem">
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Email:</span><strong>${u.email}</strong></div>
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Phone:</span><strong>${u.phone}</strong></div>
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Bin Type:</span><strong style="text-transform:capitalize">${customer.binType}</strong></div>
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Schedule:</span><strong style="text-transform:capitalize">${customer.collectionSchedule?.day || 'N/A'} (${customer.collectionSchedule?.frequency || 'weekly'})</strong></div>
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Monthly:</span><strong>${formatCurrency(customer.monthlyFee)}</strong></div>
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Member:</span><strong>${formatDate(customer.registrationDate)}</strong></div>
+        </div>
+      `;
+
+      // Pre-fill form
+      document.getElementById('fullName').value = u.fullName;
+      document.getElementById('phone').value = u.phone;
+      document.getElementById('address').value = customer.residentialAddress || '';
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  const updateProfile = async () => {
+    const btn = document.getElementById('updateProfileBtn');
+    setButtonLoading(btn, true, 'Saving...');
+    try {
+      await api.updateProfile({
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+      });
+      Toast.success('Updated', 'Profile updated successfully');
+      const stored = getAuthUser();
+      if (stored) {
+        stored.fullName = document.getElementById('fullName').value.trim();
+        localStorage.setItem('wm_user', JSON.stringify(stored));
+      }
+    } catch (err) {
+      Toast.error('Error', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  const changePassword = async () => {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!currentPassword || !newPassword) return Toast.warning('Required', 'Please fill all password fields');
+    if (newPassword.length < 8) return Toast.warning('Too Short', 'New password must be at least 8 characters');
+    if (newPassword !== confirmPassword) return Toast.warning('Mismatch', 'Passwords do not match');
+
+    const btn = document.getElementById('changePwdBtn');
+    setButtonLoading(btn, true, 'Updating...');
+    try {
+      await api.updatePassword({ currentPassword, newPassword });
+      Toast.success('Updated', 'Password changed successfully');
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+    } catch (err) {
+      Toast.error('Error', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  const uploadPhoto = async (input) => {
+    if (!input.files[0]) return;
+    const formData = new FormData();
+    formData.append('profileImage', input.files[0]);
+    try {
+      Toast.info('Uploading', 'Uploading photo...');
+      const { data } = await api.updateProfile(formData);
+      Toast.success('Done', 'Profile photo updated');
+      const stored = getAuthUser();
+      if (stored && data?.user) {
+        stored.profileImage = data.user.profileImage;
+        localStorage.setItem('wm_user', JSON.stringify(stored));
+        populateSidebarUser(stored);
+      }
+      await loadProfile();
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  loadProfile();
+</script>
+</body>
+</html>

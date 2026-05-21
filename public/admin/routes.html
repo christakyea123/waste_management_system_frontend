@@ -1,0 +1,246 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Routes | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item active"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarName">Admin</div>
+          <div class="user-role" id="sidebarRole">Administrator</div>
+        </div>
+        <button class="logout-btn" title="Logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Routes</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle title="Toggle theme"><i class="fas fa-moon"></i></button>
+        <button class="topbar-btn" onclick="loadRoutes()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Collection Routes</h1><p>Manage zones and route assignments</p></div>
+        <button class="btn btn-primary" onclick="openCreateModal()">
+          <i class="fas fa-plus"></i> Add Route
+        </button>
+      </div>
+
+      <!-- Route Cards -->
+      <div id="routesGrid" class="grid-3" style="gap:1rem;margin-bottom:1.5rem">
+        <div class="card"><div class="skeleton" style="height:140px"></div></div>
+        <div class="card"><div class="skeleton" style="height:140px"></div></div>
+        <div class="card"><div class="skeleton" style="height:140px"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Create/Edit Route Modal -->
+<div class="modal-overlay" id="routeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="routeModalTitle">Add Route</h3>
+      <button class="modal-close" onclick="closeModal('routeModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="routeId" />
+      <div class="form-group">
+        <label class="form-label">Route Name *</label>
+        <input type="text" id="routeName" class="form-control" placeholder="e.g. East Legon Zone A" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zone *</label>
+        <input type="text" id="routeZone" class="form-control" placeholder="e.g. East Legon" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" id="routeDesc" class="form-control" placeholder="Optional description" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Collection Days</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem" id="daysCheckboxes">
+          <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer"><input type="checkbox" value="monday"> Monday</label>
+          <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer"><input type="checkbox" value="tuesday"> Tuesday</label>
+          <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer"><input type="checkbox" value="wednesday"> Wednesday</label>
+          <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer"><input type="checkbox" value="thursday"> Thursday</label>
+          <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer"><input type="checkbox" value="friday"> Friday</label>
+          <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer"><input type="checkbox" value="saturday"> Saturday</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estimated Duration (minutes)</label>
+        <input type="number" id="routeDuration" class="form-control" value="180" min="30" max="600" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('routeModal')">Cancel</button>
+      <button class="btn btn-primary" id="routeSaveBtn" onclick="saveRoute()"><i class="fas fa-save"></i> Save Route</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin', 'superadmin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  const isSuperAdmin = user.role === 'superadmin';
+
+  const dayLabels = { monday:'Mon', tuesday:'Tue', wednesday:'Wed', thursday:'Thu', friday:'Fri', saturday:'Sat' };
+
+  const loadRoutes = async () => {
+    try {
+      const { data } = await api.getRoutes('?limit=50');
+      const grid = document.getElementById('routesGrid');
+      if (!data.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:3rem"><i class="fas fa-route" style="font-size:3rem;margin-bottom:1rem;display:block"></i>No routes defined yet. Click "Add Route" to create one.</div>';
+        return;
+      }
+      grid.innerHTML = data.map(r => `
+        <div class="card" style="transition:box-shadow 0.2s">
+          <div class="card-header" style="justify-content:space-between">
+            <div>
+              <div style="font-weight:700;font-size:0.95rem">${r.name}</div>
+              <div style="font-size:0.78rem;color:#94a3b8;margin-top:0.2rem"><i class="fas fa-map-marker-alt"></i> ${r.zone}</div>
+            </div>
+            <span class="badge ${r.isActive ? 'badge-success' : 'badge-secondary'}">${r.isActive ? 'Active' : 'Inactive'}</span>
+          </div>
+          <div class="card-body" style="padding:1rem">
+            <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem">${r.description || 'No description'}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.75rem">
+              ${(r.collectionDays || []).map(d => `<span class="badge badge-info" style="font-size:0.7rem">${dayLabels[d] || d}</span>`).join('') || '<span style="font-size:0.8rem;color:#94a3b8">No days set</span>'}
+            </div>
+            <div style="font-size:0.8rem;color:#64748b">
+              <i class="fas fa-clock"></i> ~${r.estimatedDuration || 180} min &nbsp;
+              <i class="fas fa-users"></i> ${r.customers?.length || 0} customers
+            </div>
+            ${r.assignedDriver ? `<div style="font-size:0.8rem;color:#22c55e;margin-top:0.5rem"><i class="fas fa-id-card"></i> ${r.assignedDriver.user?.fullName || 'Driver assigned'}</div>` : '<div style="font-size:0.8rem;color:#94a3b8;margin-top:0.5rem"><i class="fas fa-id-card"></i> No driver assigned</div>'}
+          </div>
+          <div class="card-footer" style="display:flex;gap:0.5rem">
+            <button class="btn btn-sm btn-outline" onclick='openEditModal(${JSON.stringify(r)})'>
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            ${isSuperAdmin ? `<button class="btn btn-sm btn-danger" onclick="deleteRoute('${r._id}','${r.name}')"><i class="fas fa-trash"></i> Delete</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      showToast('Failed to load routes', 'error');
+    }
+  };
+
+  const openCreateModal = () => {
+    document.getElementById('routeId').value = '';
+    document.getElementById('routeModalTitle').textContent = 'Add Route';
+    document.getElementById('routeName').value = '';
+    document.getElementById('routeZone').value = '';
+    document.getElementById('routeDesc').value = '';
+    document.getElementById('routeDuration').value = '180';
+    document.querySelectorAll('#daysCheckboxes input').forEach(cb => cb.checked = false);
+    openModal('routeModal');
+  };
+
+  const openEditModal = (r) => {
+    document.getElementById('routeId').value = r._id;
+    document.getElementById('routeModalTitle').textContent = 'Edit Route';
+    document.getElementById('routeName').value = r.name;
+    document.getElementById('routeZone').value = r.zone;
+    document.getElementById('routeDesc').value = r.description || '';
+    document.getElementById('routeDuration').value = r.estimatedDuration || 180;
+    document.querySelectorAll('#daysCheckboxes input').forEach(cb => {
+      cb.checked = (r.collectionDays || []).includes(cb.value);
+    });
+    openModal('routeModal');
+  };
+
+  const saveRoute = async () => {
+    const id = document.getElementById('routeId').value;
+    const name = document.getElementById('routeName').value.trim();
+    const zone = document.getElementById('routeZone').value.trim();
+    if (!name || !zone) { showToast('Name and zone are required', 'error'); return; }
+    const collectionDays = [...document.querySelectorAll('#daysCheckboxes input:checked')].map(cb => cb.value);
+    const payload = {
+      name, zone,
+      description: document.getElementById('routeDesc').value.trim(),
+      estimatedDuration: parseInt(document.getElementById('routeDuration').value) || 180,
+      collectionDays,
+    };
+    try {
+      if (id) { await api.updateRoute(id, payload); showToast('Route updated', 'success'); }
+      else { await api.createRoute(payload); showToast('Route created', 'success'); }
+      closeModal('routeModal');
+      loadRoutes();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  const deleteRoute = async (id, name) => {
+    if (!confirm(`Delete route "${name}"? This cannot be undone.`)) return;
+    try {
+      await api.deleteRoute(id);
+      showToast('Route deleted', 'success');
+      loadRoutes();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  loadRoutes();
+</script>
+</body>
+</html>

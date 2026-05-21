@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Customers | Driver Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/driver/dashboard.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="/driver/dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/driver/collections.html" class="nav-item"><i class="fas fa-truck"></i> All Collections</a>
+        <a href="/driver/customers.html" class="nav-item active"><i class="fas fa-users"></i> My Customers</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Account</div>
+        <a href="/driver/profile.html" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">D</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Driver</div><div class="user-role">Driver</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">My Customers</span>
+      <div class="topbar-actions"><button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>My Customers</h1><p id="customerCount">Loading customers...</p></div>
+        <button class="btn btn-outline" onclick="toggleView()"><i class="fas fa-map" id="viewIcon"></i> <span id="viewLabel">Map View</span></button>
+      </div>
+
+      <!-- List View -->
+      <div id="listView">
+        <div class="filter-bar" style="margin-bottom:1rem">
+          <input type="text" class="form-control" id="searchInput" placeholder="Search by name or address..." style="width:240px" oninput="filterCustomers()" />
+        </div>
+
+        <div id="customersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
+          <div class="skeleton" style="height:140px;border-radius:12px"></div>
+          <div class="skeleton" style="height:140px;border-radius:12px"></div>
+          <div class="skeleton" style="height:140px;border-radius:12px"></div>
+        </div>
+        <div id="paginationContainer" style="margin-top:1rem"></div>
+      </div>
+
+      <!-- Map View -->
+      <div id="mapView" style="display:none">
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div id="map" style="height:500px;border-radius:12px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['driver']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  let allCustomers = [];
+  let map = null;
+  let showingMap = false;
+
+  const loadCustomers = async (page = 1) => {
+    try {
+      const res = await api.getDriverCustomers(`?page=${page}&limit=50`);
+      const { data, pagination } = res;
+      allCustomers = data;
+      document.getElementById('customerCount').textContent = `${pagination.total} assigned customers`;
+
+      renderCustomers(data, pagination, page);
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  const renderCustomers = (data, pagination, page) => {
+    const grid = document.getElementById('customersGrid');
+    if (!data?.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon"><i class="fas fa-users"></i></div><div class="empty-title">No customers assigned</div></div>`;
+      return;
+    }
+
+    grid.innerHTML = data.map((c) => {
+      const u = c.user || {};
+      const initials = (u.fullName || '?').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0,2);
+      return `
+        <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:1rem">
+          <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:0.75rem">
+            <div style="width:40px;height:40px;border-radius:50%;background:#16a34a22;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;color:#16a34a;flex-shrink:0">
+              ${u.profileImage ? `<img src="${u.profileImage}" style="width:40px;height:40px;border-radius:50%;object-fit:cover" />` : initials}
+            </div>
+            <div style="min-width:0">
+              <div style="font-weight:600;font-size:0.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.fullName || 'Unknown'}</div>
+              <div style="font-size:0.75rem;color:#64748b">${c.customerId}</div>
+            </div>
+          </div>
+          <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.3rem"><i class="fas fa-map-marker-alt" style="color:#16a34a;margin-right:0.3rem"></i>${c.residentialAddress || 'No address'}</div>
+          <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem"><i class="fas fa-calendar" style="color:#3b82f6;margin-right:0.3rem"></i>${(c.collectionSchedule?.day || 'Monday').toUpperCase()}</div>
+          <div style="display:flex;gap:0.4rem">
+            ${u.phone ? `<a href="tel:${u.phone}" class="btn btn-sm btn-outline"><i class="fas fa-phone"></i> Call</a>` : ''}
+            <a href="/driver/collections.html" class="btn btn-sm btn-secondary"><i class="fas fa-truck"></i> Collections</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (pagination && pagination.pages > 1) {
+      document.getElementById('paginationContainer').appendChild(renderPagination(pagination, loadCustomers));
+    }
+  };
+
+  const filterCustomers = () => {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allCustomers.filter((c) => {
+      const name = (c.user?.fullName || '').toLowerCase();
+      const addr = (c.residentialAddress || '').toLowerCase();
+      return name.includes(q) || addr.includes(q);
+    });
+    document.getElementById('customersGrid').innerHTML = '';
+    renderCustomers(filtered, { pages: 1, total: filtered.length }, 1);
+  };
+
+  const toggleView = () => {
+    showingMap = !showingMap;
+    document.getElementById('listView').style.display = showingMap ? 'none' : 'block';
+    document.getElementById('mapView').style.display = showingMap ? 'block' : 'none';
+    document.getElementById('viewIcon').className = showingMap ? 'fas fa-list' : 'fas fa-map';
+    document.getElementById('viewLabel').textContent = showingMap ? 'List View' : 'Map View';
+
+    if (showingMap && !map) initMap();
+  };
+
+  const initMap = () => {
+    map = L.map('map').setView([5.6037, -0.187], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Â© OpenStreetMap contributors',
+    }).addTo(map);
+
+    allCustomers.forEach((c, i) => {
+      const coords = c.location?.coordinates;
+      if (!coords) return;
+      const [lng, lat] = coords;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="background:#16a34a;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${i+1}</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+      L.marker([lat, lng], { icon })
+        .addTo(map)
+        .bindPopup(`<strong>${c.user?.fullName || 'Customer'}</strong><br>${c.residentialAddress || ''}<br>${c.user?.phone || ''}`);
+    });
+  };
+
+  loadCustomers(1);
+</script>
+</body>
+</html>

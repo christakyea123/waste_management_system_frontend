@@ -1,0 +1,223 @@
+﻿﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payments | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item active"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Admin</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Payment Management</span>
+      <div class="topbar-actions"><button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Payments</h1><p id="totalCount">Loading...</p></div>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header">
+          <span class="card-title">Monthly Revenue</span>
+          <select class="form-control" id="yearSelect" style="width:100px" onchange="loadRevenueChart()">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+        <div class="card-body">
+          <canvas id="revenueChart" height="100"></canvas>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="paymentStats" style="margin-bottom:1.5rem">
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-body" style="padding:1rem">
+          <div class="filter-bar">
+            <input type="text" class="form-control" id="searchRef" placeholder="Search reference..." style="width:200px" />
+            <button class="btn btn-secondary" onclick="loadPayments(1)"><i class="fas fa-search"></i> Search</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Customer</th>
+                <th>Invoice</th>
+                <th>Amount</th>
+                <th>Channel</th>
+                <th>Paid At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsTable">
+              <tr><td colspan="7"><div class="skeleton" style="height:40px;margin:0.5rem 1rem"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer" id="paginationContainer"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin', 'superadmin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  document.getElementById('yearSelect').value = new Date().getFullYear();
+
+  let chart = null;
+
+  const loadRevenueChart = async () => {
+    const year = document.getElementById('yearSelect').value;
+    try {
+      const { data } = await api.getRevenueAnalytics(year);
+      const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const values = data.monthlyRevenue.map((m) => m.total);
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: `Revenue ${year} (GHS)`,
+            data: values,
+            backgroundColor: 'rgba(22,163,74,0.15)',
+            borderColor: '#16a34a',
+            borderWidth: 2,
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: (v) => 'GHS ' + v.toLocaleString() } },
+          },
+        },
+      });
+    } catch (_) {}
+  };
+
+  const loadPayments = async (page = 1) => {
+    const search = document.getElementById('searchRef').value.trim();
+    let params = `?page=${page}&limit=25`;
+    if (search) params += `&reference=${encodeURIComponent(search)}`;
+
+    try {
+      const res = await api.getAdminPayments(params);
+      const { data, pagination } = res;
+      document.getElementById('totalCount').textContent = `${pagination.total} payments`;
+
+      const total = data.reduce((s, p) => s + (p.amount || 0), 0);
+      const byCard = data.filter((p) => p.channel === 'card').length;
+      const byMomo = data.filter((p) => ['mobile_money', 'momo'].includes(p.channel)).length;
+      document.getElementById('paymentStats').innerHTML = `
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-money-bill"></i></div><div class="stat-info"><div class="stat-value">${formatCurrency(total)}</div><div class="stat-label">Revenue (Page)</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-credit-card"></i></div><div class="stat-info"><div class="stat-value">${byCard}</div><div class="stat-label">Card Payments</div></div></div>
+        <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-mobile-alt"></i></div><div class="stat-info"><div class="stat-value">${byMomo}</div><div class="stat-label">Mobile Money</div></div></div>
+      `;
+
+      const tbody = document.getElementById('paymentsTable');
+      if (!data?.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="fas fa-credit-card"></i></div><div class="empty-title">No payments found</div></div></td></tr>`;
+        document.getElementById('paginationContainer').innerHTML = '';
+        return;
+      }
+
+      tbody.innerHTML = data.map((p) => `
+        <tr>
+          <td style="font-size:0.8rem;font-family:monospace">${p.paystackReference || '&mdash;'}</td>
+          <td>
+            <div style="font-weight:500;font-size:0.875rem">${p.customer?.user?.fullName || 'N/A'}</div>
+            <div style="font-size:0.75rem;color:#64748b">${p.customer?.customerId || ''}</div>
+          </td>
+          <td>${p.invoice?.invoiceNumber || '&mdash;'}</td>
+          <td><strong>${formatCurrency(p.amount)}</strong></td>
+          <td style="text-transform:capitalize">${p.channel || '&mdash;'}</td>
+          <td>${formatDate(p.paidAt)}</td>
+          <td>${statusBadge(p.status)}</td>
+        </tr>
+      `).join('');
+
+      const pc = document.getElementById('paginationContainer');
+      pc.innerHTML = '';
+      if (pagination.pages > 1) pc.appendChild(renderPagination(pagination, loadPayments));
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  loadRevenueChart();
+  loadPayments(1);
+</script>
+</body>
+</html>

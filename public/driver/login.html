@@ -1,0 +1,351 @@
+﻿﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver Login | WasteManagement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+    .auth-card { background: #fff; border-radius: 20px; padding: 2.5rem; box-shadow: 0 24px 64px rgba(0,0,0,0.4); width: 100%; max-width: 420px; }
+    .auth-logo { text-align: center; margin-bottom: 2rem; }
+    .driver-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: #dbeafe; color: #1d4ed8; padding: 0.3rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; margin-bottom: 1rem; }
+    h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 0.4rem; }
+    .subtitle { color: #64748b; margin-bottom: 2rem; font-size: 0.9rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    label { font-size: 0.85rem; font-weight: 600; color: #334155; }
+    input { padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #1e293b; width: 100%; transition: border-color 0.2s; }
+    input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .password-wrapper { position: relative; }
+    .password-toggle { position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.8rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; font-family: 'Inter', sans-serif; width: 100%; transition: all 0.2s; }
+    .btn-driver { background: #1d4ed8; color: #fff; }
+    .btn-driver:hover { background: #1e40af; }
+    .btn-outline { background: transparent; color: #1d4ed8; border: 1.5px solid #1d4ed8; }
+    .btn-outline:hover { background: #eff6ff; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error-box { background: #fef2f2; color: #dc2626; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.875rem; margin-bottom: 1rem; display: none; align-items: center; gap: 0.5rem; }
+    .success-box { background: #f0fdf4; color: #16a34a; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.875rem; margin-bottom: 1rem; display: none; align-items: center; gap: 0.5rem; border: 1px solid #dcfce7; }
+    .footer-links { text-align: center; font-size: 0.875rem; color: #64748b; margin-top: 1.5rem; }
+    .footer-links a { color: #1d4ed8; font-weight: 600; text-decoration: none; }
+    .info-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.82rem; color: #0369a1; }
+    .forgot-link { background: none; border: none; color: #1d4ed8; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none; padding: 0; }
+    .forgot-link:hover { text-decoration: underline; }
+    /* Forgot password panel */
+    .fp-panel { border-top: 1.5px solid #e2e8f0; margin-top: 1.5rem; padding-top: 1.5rem; display: none; }
+    .fp-panel.visible { display: block; }
+    .fp-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 0.4rem; }
+    .fp-subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 1.25rem; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .otp-inputs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .otp-inputs input { text-align: center; font-size: 1.3rem; font-weight: 700; padding: 0.6rem 0; border-radius: 10px; }
+    .otp-inputs input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .field-hint { font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; }
+    .dev-otp-box { background: #fef9c3; border: 1px solid #fde68a; border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.8rem; color: #92400e; margin-bottom: 1rem; display: none; }
+  </style>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="/" style="font-size:1.5rem;font-weight:800;color:#0f172a;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem">
+        <img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" style="height:64px;width:auto;max-width:220px;object-fit:contain;border-radius:8px;" />
+      </a>
+    </div>
+    <div class="driver-badge"><i class="fas fa-truck"></i> Driver Portal</div>
+    <h1>Driver Login</h1>
+    <p class="subtitle">Access your collection dashboard</p>
+
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      Your login credentials were provided by the admin. Contact your supervisor if you need help.
+    </div>
+
+    <!-- â”€â”€ Login Form â”€â”€ -->
+    <div id="loginSection">
+      <div class="error-box" id="errorBox">
+        <i class="fas fa-exclamation-circle"></i><span id="errorMsg"></span>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="driver@wastemanagement.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="password" style="display:flex;justify-content:space-between;align-items:center">
+            Password
+            <button type="button" class="forgot-link" onclick="showForgotPanel()">Forgot password?</button>
+          </label>
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Your password" required autocomplete="current-password" />
+            <button type="button" class="password-toggle" onclick="togglePwd('password','eyeIco')">
+              <i class="fas fa-eye" id="eyeIco"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-driver" id="loginBtn">
+          <i class="fas fa-truck"></i> Login to Driver Portal
+        </button>
+      </form>
+    </div>
+
+    <!-- â”€â”€ Forgot Password Panel â”€â”€ -->
+    <div class="fp-panel" id="fpPanel">
+      <div class="fp-title"><i class="fas fa-lock-open" style="color:#1d4ed8"></i> Reset Password</div>
+
+      <!-- Step 1: Enter phone -->
+      <div class="step active" id="fpStep1">
+        <p class="fp-subtitle">Enter your registered phone number to receive a reset code.</p>
+        <div class="error-box" id="fpError1" style="margin-bottom:0.75rem">
+          <i class="fas fa-exclamation-circle"></i><span id="fpErrorMsg1"></span>
+        </div>
+        <div class="dev-otp-box" id="devOtpBox">
+          <i class="fas fa-flask"></i> <strong>Dev mode &mdash; OTP: <span id="devOtpValue"></span></strong>
+        </div>
+        <div class="form-group">
+          <label for="fpPhone">Phone Number</label>
+          <input type="tel" id="fpPhone" placeholder="0244123456" autocomplete="tel" />
+          <span class="field-hint">e.g. 0244123456 or +233244123456</span>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <button type="button" class="btn btn-outline" onclick="hideForgotPanel()" style="flex:1">Cancel</button>
+          <button type="button" class="btn btn-driver" id="sendCodeBtn" onclick="sendResetCode()" style="flex:2">
+            <i class="fas fa-paper-plane"></i> Send Reset Code
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Enter OTP + new password -->
+      <div class="step" id="fpStep2">
+        <p class="fp-subtitle">Enter the 6-digit code sent to <strong id="fpPhoneDisplay"></strong>.</p>
+        <div class="error-box" id="fpError2" style="margin-bottom:0.75rem">
+          <i class="fas fa-exclamation-circle"></i><span id="fpErrorMsg2"></span>
+        </div>
+        <div class="success-box" id="fpSuccess2" style="margin-bottom:0.75rem">
+          <i class="fas fa-check-circle"></i><span id="fpSuccessMsg2"></span>
+        </div>
+        <div class="form-group">
+          <label>Reset Code</label>
+          <div class="otp-inputs" id="otpInputs">
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="fpNewPwd">New Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="fpNewPwd" placeholder="At least 8 characters" />
+            <button type="button" class="password-toggle" onclick="togglePwd('fpNewPwd','fpEyeIco')">
+              <i class="fas fa-eye" id="fpEyeIco"></i>
+            </button>
+          </div>
+          <span class="field-hint">Minimum 8 characters</span>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <button type="button" class="btn btn-outline" onclick="backToStep1()" style="flex:1">
+            <i class="fas fa-arrow-left"></i> Back
+          </button>
+          <button type="button" class="btn btn-driver" id="resetPwdBtn" onclick="doResetPassword()" style="flex:2">
+            <i class="fas fa-check"></i> Reset Password
+          </button>
+        </div>
+        <div style="text-align:center;margin-top:0.75rem">
+          <button type="button" class="forgot-link" onclick="resendCode()">Didn't receive the code? Resend</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <a href="/">&larr; Back to Home</a>
+    </div>
+  </div>
+
+  <script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+  <script>
+    const u = getAuthUser();
+    const _exp = localStorage.getItem('wm_auth_expiry');
+    if (u && u.role === 'driver' && (!_exp || Date.now() < parseInt(_exp, 10))) {
+      window.location.href = '/driver/dashboard.html';
+    }
+
+    function togglePwd(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const ico = document.getElementById(iconId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      ico.className = `fas fa-eye${input.type === 'password' ? '' : '-slash'}`;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const errorBox = document.getElementById('errorBox');
+      errorBox.style.display = 'none';
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+      btn.disabled = true;
+
+      try {
+        const result = await api.login(
+          document.getElementById('email').value.trim(),
+          document.getElementById('password').value
+        );
+        if (result.user.role !== 'driver') {
+          throw { message: 'This portal is for drivers only. Use the correct login portal.' };
+        }
+        saveAuthState(result);
+        window.location.href = '/driver/dashboard.html';
+      } catch (err) {
+        document.getElementById('errorMsg').textContent = err.message || 'Login failed';
+        errorBox.style.display = 'flex';
+        btn.innerHTML = '<i class="fas fa-truck"></i> Login to Driver Portal';
+        btn.disabled = false;
+      }
+    });
+
+    // â”€â”€ Forgot Password â”€â”€
+    function showForgotPanel() {
+      document.getElementById('fpPanel').classList.add('visible');
+      document.getElementById('fpPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById('fpPhone').focus();
+    }
+
+    function hideForgotPanel() {
+      document.getElementById('fpPanel').classList.remove('visible');
+      resetFpPanel();
+    }
+
+    function resetFpPanel() {
+      showFpStep(1);
+      document.getElementById('fpPhone').value = '';
+      document.getElementById('fpNewPwd').value = '';
+      document.querySelectorAll('.otp-digit').forEach(i => i.value = '');
+      document.getElementById('fpError1').style.display = 'none';
+      document.getElementById('fpError2').style.display = 'none';
+      document.getElementById('fpSuccess2').style.display = 'none';
+      document.getElementById('devOtpBox').style.display = 'none';
+    }
+
+    function showFpStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`fpStep${n}`).classList.add('active');
+    }
+
+    function backToStep1() {
+      showFpStep(1);
+      document.getElementById('fpError2').style.display = 'none';
+      document.getElementById('fpSuccess2').style.display = 'none';
+    }
+
+    document.querySelectorAll('.otp-digit').forEach((input, i, inputs) => {
+      input.addEventListener('input', () => {
+        input.value = input.value.replace(/\D/g, '');
+        if (input.value && i < inputs.length - 1) inputs[i + 1].focus();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && i > 0) inputs[i - 1].focus();
+      });
+      input.addEventListener('paste', (e) => {
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        if (pasted.length === 6) {
+          [...pasted].forEach((ch, j) => { if (inputs[j]) inputs[j].value = ch; });
+          inputs[5].focus();
+          e.preventDefault();
+        }
+      });
+    });
+
+    function getOtpValue() {
+      return [...document.querySelectorAll('.otp-digit')].map(i => i.value).join('');
+    }
+
+    async function sendResetCode() {
+      const phone = document.getElementById('fpPhone').value.trim();
+      const errBox = document.getElementById('fpError1');
+      const btn = document.getElementById('sendCodeBtn');
+      errBox.style.display = 'none';
+
+      if (!phone) {
+        document.getElementById('fpErrorMsg1').textContent = 'Please enter your phone number.';
+        errBox.style.display = 'flex';
+        return;
+      }
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+      btn.disabled = true;
+
+      try {
+        const result = await api.forgotPassword(phone);
+        document.getElementById('fpPhoneDisplay').textContent = phone;
+        if (result.data && result.data.otp) {
+          document.getElementById('devOtpValue').textContent = result.data.otp;
+          document.getElementById('devOtpBox').style.display = 'block';
+        }
+        showFpStep(2);
+        document.querySelectorAll('.otp-digit')[0].focus();
+      } catch (err) {
+        document.getElementById('fpErrorMsg1').textContent = err.message || 'Failed to send reset code.';
+        errBox.style.display = 'flex';
+      } finally {
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Code';
+        btn.disabled = false;
+      }
+    }
+
+    async function resendCode() {
+      showFpStep(1);
+      await sendResetCode();
+    }
+
+    async function doResetPassword() {
+      const phone = document.getElementById('fpPhone').value.trim();
+      const code = getOtpValue();
+      const newPassword = document.getElementById('fpNewPwd').value;
+      const errBox = document.getElementById('fpError2');
+      const successBox = document.getElementById('fpSuccess2');
+      const btn = document.getElementById('resetPwdBtn');
+      errBox.style.display = 'none';
+      successBox.style.display = 'none';
+
+      if (code.length !== 6) {
+        document.getElementById('fpErrorMsg2').textContent = 'Please enter all 6 digits.';
+        errBox.style.display = 'flex';
+        return;
+      }
+      if (newPassword.length < 8) {
+        document.getElementById('fpErrorMsg2').textContent = 'Password must be at least 8 characters.';
+        errBox.style.display = 'flex';
+        return;
+      }
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
+      btn.disabled = true;
+
+      try {
+        await api.resetPassword({ phone, code, newPassword });
+        successBox.style.display = 'flex';
+        document.getElementById('fpSuccessMsg2').textContent = 'Password reset! You can now log in.';
+        setTimeout(() => {
+          hideForgotPanel();
+          document.getElementById('email').focus();
+        }, 2000);
+      } catch (err) {
+        document.getElementById('fpErrorMsg2').textContent = err.message || 'Reset failed. Try again.';
+        errBox.style.display = 'flex';
+      } finally {
+        btn.innerHTML = '<i class="fas fa-check"></i> Reset Password';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | 035 F Arkoh Waste Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/admin/index.html" class="sidebar-logo">
+        <img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" />
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item active">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="/admin/analytics.html" class="nav-item">
+          <i class="fas fa-chart-line"></i> Analytics
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item">
+          <i class="fas fa-users"></i> Customers
+        </a>
+        <a href="/admin/drivers.html" class="nav-item">
+          <i class="fas fa-id-card"></i> Drivers
+        </a>
+        <a href="/admin/collections.html" class="nav-item">
+          <i class="fas fa-truck"></i> Collections
+        </a>
+        <a href="/admin/routes.html" class="nav-item">
+          <i class="fas fa-route"></i> Routes
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item">
+          <i class="fas fa-file-invoice"></i> Invoices
+        </a>
+        <a href="/admin/payments.html" class="nav-item">
+          <i class="fas fa-credit-card"></i> Payments
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item">
+          <i class="fas fa-sms"></i> SMS Center
+        </a>
+        <a href="/admin/complaints.html" class="nav-item">
+          <i class="fas fa-comment-alt"></i> Complaints
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item">
+          <i class="fas fa-list-alt"></i> Activity Logs
+        </a>
+        <a href="/admin/settings.html" class="nav-item">
+          <i class="fas fa-cog"></i> Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarName">Admin</div>
+          <div class="user-role" id="sidebarRole">Administrator</div>
+        </div>
+        <button class="logout-btn" title="Logout" onclick="doLogout()">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Admin Dashboard</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle title="Toggle theme"><i class="fas fa-moon"></i></button>
+        <button class="topbar-btn" id="refreshBtn" title="Refresh data"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1>Overview Dashboard</h1>
+          <p id="dateDisplay"></p>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <a href="/admin/customers.html" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add Customer
+          </a>
+          <a href="/admin/drivers.html" class="btn btn-outline">
+            <i class="fas fa-id-card"></i> Add Driver
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Stats -->
+      <div class="stats-grid" id="mainStats">
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid-2" style="margin-top:1.5rem;gap:1.5rem">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Monthly Revenue</span>
+            <select id="revenueYear" class="form-control" style="width:100px;padding:0.3rem 0.6rem;font-size:0.8rem">
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+          <div class="card-body chart-container" style="height:280px">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Collections This Month</span>
+          </div>
+          <div class="card-body chart-container" style="height:280px">
+            <canvas id="collectionsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Tables Row -->
+      <div class="grid-2" style="margin-top:1.5rem;gap:1.5rem">
+        <!-- Recent Registrations -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Registrations</span>
+            <a href="/admin/customers.html" class="btn btn-sm btn-outline">View All</a>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentCustomers">
+                <tr><td colspan="3">${skeletonRows ? '' : ''}<div class="skeleton" style="height:40px;margin:0.5rem 1rem"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Driver Performance -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Driver Performance</span>
+            <a href="/admin/drivers.html" class="btn btn-sm btn-outline">View All</a>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Driver</th>
+                  <th>Completed</th>
+                  <th>Rate</th>
+                </tr>
+              </thead>
+              <tbody id="driverPerformance">
+                <tr><td colspan="3"><div class="skeleton" style="height:40px;margin:0.5rem 1rem"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <span class="card-title">Customer Map Overview</span>
+          <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem">
+            <span style="color:#64748b" id="mapCount">Loading customers...</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div id="adminMap" style="height:400px;border-radius:0 0 12px 12px"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast container will be injected by utils.js -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  // Auth guard
+  const user = requireAuth(['admin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+
+  initSidebar();
+  initTheme();
+  populateSidebarUser(user);
+
+  // Date display
+  document.getElementById('dateDisplay').textContent = new Intl.DateTimeFormat('en-GH', { dateStyle: 'full' }).format(new Date());
+
+  let revenueChart = null;
+  let collectionsChart = null;
+  let adminMap = null;
+
+  const loadStats = async () => {
+    try {
+      const { data } = await api.getDashboard();
+      document.getElementById('mainStats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-value">${data.customers.total.toLocaleString()}</div>
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> ${data.customers.active} active</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-id-card"></i></div>
+          <div class="stat-info">
+            <div class="stat-value">${data.drivers.total}</div>
+            <div class="stat-label">Total Drivers</div>
+            <div class="stat-change up"><i class="fas fa-circle" style="font-size:0.5rem"></i> ${data.drivers.active} on duty</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="stat-info">
+            <div class="stat-value">${formatCurrency(data.revenue.monthly)}</div>
+            <div class="stat-label">Monthly Revenue</div>
+            <div class="stat-change up">Total: ${formatCurrency(data.revenue.total)}</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow"><i class="fas fa-truck"></i></div>
+          <div class="stat-info">
+            <div class="stat-value">${data.collections.completionRate}%</div>
+            <div class="stat-label">Collection Rate</div>
+            <div class="stat-change ${data.collections.completionRate >= 90 ? 'up' : 'down'}">${data.collections.completed}/${data.collections.total} done</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div class="stat-info">
+            <div class="stat-value">${data.invoices.pending}</div>
+            <div class="stat-label">Pending Invoices</div>
+            <div class="stat-change down"><i class="fas fa-exclamation"></i> ${data.invoices.overdue} overdue</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+          <div class="stat-info">
+            <div class="stat-value">${data.collections.missed}</div>
+            <div class="stat-label">Missed This Month</div>
+            <div class="stat-change down">Needs attention</div>
+          </div>
+        </div>
+      `;
+
+      // Recent customers table
+      const tbody = document.getElementById('recentCustomers');
+      if (data.recentRegistrations?.length) {
+        tbody.innerHTML = data.recentRegistrations.map((c) => `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                <div class="avatar avatar-sm">${getInitials(c.user?.fullName)}</div>
+                <span style="font-weight:500">${c.user?.fullName || 'N/A'}</span>
+              </div>
+            </td>
+            <td>${c.user?.phone || 'N/A'}</td>
+            <td>${timeAgo(c.user?.createdAt)}</td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-muted text-sm" style="padding:1rem">No recent registrations</td></tr>`;
+      }
+
+    } catch (err) {
+      Toast.error('Dashboard Error', err.message);
+    }
+  };
+
+  const loadRevenueChart = async (year) => {
+    try {
+      const { data } = await api.getRevenueAnalytics(year);
+      const labels = data.monthlyRevenue.map((m) => monthNames[m.month - 1].slice(0, 3));
+      const amounts = data.monthlyRevenue.map((m) => m.total);
+
+      if (revenueChart) revenueChart.destroy();
+      revenueChart = new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Revenue (GHS)',
+            data: amounts,
+            backgroundColor: 'rgba(22,163,74,0.8)',
+            borderColor: '#16a34a',
+            borderWidth: 1,
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { callback: (v) => `GHS ${v.toLocaleString()}` }, grid: { color: '#f1f5f9' } },
+            x: { grid: { display: false } },
+          },
+        },
+      });
+    } catch (err) {
+      console.error('Revenue chart error:', err);
+    }
+  };
+
+  const loadCollectionsChart = async () => {
+    try {
+      const now = new Date();
+      const { data } = await api.getCollectionAnalytics(now.getMonth() + 1, now.getFullYear());
+      const statMap = {};
+      data.stats.forEach((s) => { statMap[s._id] = s.count; });
+
+      if (collectionsChart) collectionsChart.destroy();
+      collectionsChart = new Chart(document.getElementById('collectionsChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Picked', 'Missed', 'Scheduled', 'Rescheduled'],
+          datasets: [{
+            data: [
+              statMap['picked'] || 0,
+              statMap['missed'] || 0,
+              statMap['scheduled'] || 0,
+              statMap['rescheduled'] || 0,
+            ],
+            backgroundColor: ['#16a34a', '#ef4444', '#eab308', '#f97316'],
+            borderWidth: 0,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } },
+          },
+          cutout: '65%',
+        },
+      });
+
+      // Driver performance
+      const perfTbody = document.getElementById('driverPerformance');
+      if (data.driverPerformance?.length) {
+        perfTbody.innerHTML = data.driverPerformance.slice(0, 5).map((d) => `
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:0.5rem"><div class="avatar avatar-sm">${getInitials(d.name)}</div><span>${d.name}</span></div></td>
+            <td>${d.picked}/${d.total}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                <div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;">
+                  <div style="width:${d.rate.toFixed(0)}%;height:100%;background:${d.rate >= 90 ? '#16a34a' : d.rate >= 70 ? '#eab308' : '#ef4444'};border-radius:3px"></div>
+                </div>
+                <span style="font-weight:600;font-size:0.8rem">${d.rate.toFixed(0)}%</span>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        perfTbody.innerHTML = `<tr><td colspan="3" class="text-muted text-sm" style="padding:1rem">No data yet</td></tr>`;
+      }
+
+    } catch (err) {
+      console.error('Collections chart error:', err);
+    }
+  };
+
+  const loadCustomerMap = async () => {
+    try {
+      const { data } = await api.getCustomers('?limit=100');
+      const customers = data || [];
+      document.getElementById('mapCount').textContent = `${customers.length} customers shown`;
+
+      adminMap = L.map('adminMap').setView([5.6037, -0.1870], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+      }).addTo(adminMap);
+
+      customers.forEach((c) => {
+        const coords = c.location?.coordinates;
+        if (!coords || coords[0] === 0) return;
+        const [lng, lat] = coords;
+        const color = c.accountStatus === 'active' ? '#16a34a' : c.accountStatus === 'suspended' ? '#ef4444' : '#eab308';
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>`,
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+        });
+        L.marker([lat, lng], { icon })
+          .addTo(adminMap)
+          .bindPopup(`<b>${c.user?.fullName || 'Customer'}</b><br>${c.customerId}<br>${c.residentialAddress}`);
+      });
+    } catch (err) {
+      console.error('Map error:', err);
+    }
+  };
+
+  // Revenue year selector
+  document.getElementById('revenueYear').addEventListener('change', (e) => {
+    loadRevenueChart(e.target.value);
+  });
+
+  // Refresh button
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    loadStats();
+    loadCollectionsChart();
+  });
+
+  // Init
+  loadStats();
+  loadRevenueChart(new Date().getFullYear());
+  loadCollectionsChart();
+  loadCustomerMap();
+</script>
+</body>
+</html>

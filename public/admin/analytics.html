@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item active"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarName">Admin</div>
+          <div class="user-role" id="sidebarRole">Administrator</div>
+        </div>
+        <button class="logout-btn" title="Logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Analytics</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle title="Toggle theme"><i class="fas fa-moon"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Business Analytics</h1><p>Revenue, collections, and growth insights</p></div>
+        <div style="display:flex;gap:0.75rem;align-items:center">
+          <select id="yearFilter" class="form-control" style="width:120px;padding:0.5rem 0.75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Revenue Summary Cards -->
+      <div class="stats-grid" id="revenueStats">
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:80px"></div></div>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div class="grid-2" style="gap:1.5rem;margin-bottom:1.5rem">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-chart-bar"></i> Monthly Revenue (GHS)</h3>
+          </div>
+          <div class="card-body"><canvas id="revenueChart" height="220"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-users"></i> Customer Growth</h3>
+          </div>
+          <div class="card-body"><canvas id="growthChart" height="220"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Collection Analytics -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header" style="justify-content:space-between">
+          <h3 class="card-title"><i class="fas fa-truck"></i> Collection Performance</h3>
+          <div style="display:flex;gap:0.5rem">
+            <select id="collMonth" class="form-control" style="width:130px;padding:0.4rem 0.75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit">
+              <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+              <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+              <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+              <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="loadCollectionAnalytics()"><i class="fas fa-sync"></i></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem">
+            <div style="display:flex;flex-direction:column;gap:1rem">
+              <canvas id="collPieChart" height="200"></canvas>
+              <div id="collStats" style="font-size:0.875rem;color:#64748b;text-align:center">Loading...</div>
+            </div>
+            <div>
+              <h4 style="font-size:0.85rem;font-weight:700;color:#334155;margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.05em">Driver Performance</h4>
+              <div id="driverPerformanceTable"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin', 'superadmin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  let revenueChart = null, growthChart = null, collPieChart = null;
+
+  const loadRevenueAnalytics = async () => {
+    const year = document.getElementById('yearFilter').value;
+    try {
+      const { data } = await api.getRevenueAnalytics(year);
+      const months = data.monthlyRevenue;
+      const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+      const totalRevenue = months.reduce((s, m) => s + m.total, 0);
+      const maxMonthly = Math.max(...months.map(m => m.total));
+      const avgMonthly = totalRevenue / 12;
+      const totalPayments = months.reduce((s, m) => s + m.count, 0);
+
+      document.getElementById('revenueStats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="stat-info"><div class="stat-value">${formatCurrency(totalRevenue)}</div><div class="stat-label">Annual Revenue ${year}</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+          <div class="stat-info"><div class="stat-value">${formatCurrency(maxMonthly)}</div><div class="stat-label">Best Month</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow"><i class="fas fa-chart-line"></i></div>
+          <div class="stat-info"><div class="stat-value">${formatCurrency(avgMonthly)}</div><div class="stat-label">Avg Monthly Revenue</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-receipt"></i></div>
+          <div class="stat-info"><div class="stat-value">${totalPayments}</div><div class="stat-label">Total Payments ${year}</div></div>
+        </div>
+      `;
+
+      if (revenueChart) revenueChart.destroy();
+      revenueChart = new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Revenue (GHS)',
+            data: months.map(m => m.total),
+            backgroundColor: 'rgba(22,163,74,0.7)',
+            borderColor: '#16a34a',
+            borderWidth: 2,
+            borderRadius: 6,
+          }],
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } },
+      });
+
+      const growth = data.customerGrowth;
+      const growthData = Array.from({ length: 12 }, (_, i) => {
+        const found = growth.find(g => g._id === i + 1);
+        return found ? found.count : 0;
+      });
+
+      if (growthChart) growthChart.destroy();
+      growthChart = new Chart(document.getElementById('growthChart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'New Customers',
+            data: growthData,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+          }],
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } },
+      });
+    } catch (e) {
+      showToast('Failed to load revenue analytics', 'error');
+    }
+  };
+
+  const loadCollectionAnalytics = async () => {
+    const month = document.getElementById('collMonth').value;
+    const year = document.getElementById('yearFilter').value;
+    try {
+      const { data } = await api.getCollectionAnalytics(month, year);
+      const stats = data.stats;
+      const picked = stats.find(s => s._id === 'picked')?.count || 0;
+      const missed = stats.find(s => s._id === 'missed')?.count || 0;
+      const scheduled = stats.find(s => s._id === 'scheduled')?.count || 0;
+      const total = picked + missed + scheduled;
+      const rate = total > 0 ? Math.round((picked / total) * 100) : 0;
+
+      document.getElementById('collStats').innerHTML = `
+        <strong>${picked}</strong> collected Â· <strong style="color:#ef4444">${missed}</strong> missed Â· ${rate}% rate
+      `;
+
+      if (collPieChart) collPieChart.destroy();
+      collPieChart = new Chart(document.getElementById('collPieChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Collected', 'Missed', 'Scheduled'],
+          datasets: [{ data: [picked, missed, scheduled], backgroundColor: ['#22c55e','#ef4444','#f59e0b'], borderWidth: 2 }],
+        },
+        options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } },
+      });
+
+      const tbody = data.driverPerformance.map(d => `
+        <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0.75rem;align-items:center;padding:0.6rem 0;border-bottom:1px solid #f1f5f9;font-size:0.875rem">
+          <div><strong>${d.name}</strong><div style="font-size:0.75rem;color:#94a3b8">${d.driverId}</div></div>
+          <div style="text-align:center"><div style="color:#22c55e;font-weight:700">${d.picked}</div><div style="font-size:0.72rem;color:#94a3b8">done</div></div>
+          <div style="text-align:center"><div style="color:#ef4444;font-weight:700">${d.missed}</div><div style="font-size:0.72rem;color:#94a3b8">missed</div></div>
+          <div><span class="badge ${d.rate >= 90 ? 'badge-success' : d.rate >= 70 ? 'badge-warning' : 'badge-danger'}">${Math.round(d.rate)}%</span></div>
+        </div>
+      `).join('');
+      document.getElementById('driverPerformanceTable').innerHTML = tbody || '<p style="color:#94a3b8;text-align:center;padding:2rem">No data for this period</p>';
+    } catch (e) {
+      showToast('Failed to load collection analytics', 'error');
+    }
+  };
+
+  // Set current month
+  document.getElementById('collMonth').value = new Date().getMonth() + 1;
+
+  // Bind year filter change (must be after function declaration)
+  document.getElementById('yearFilter').addEventListener('change', loadRevenueAnalytics);
+
+  loadRevenueAnalytics();
+  loadCollectionAnalytics();
+</script>
+</body>
+</html>

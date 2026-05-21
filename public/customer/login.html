@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | 035 F Arkoh Waste Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-50:#f0fdf4; --green-100:#dcfce7; --green-200:#bbf7d0;
+      --green-600:#16a34a; --green-700:#15803d;
+      --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+      --gray-400:#94a3b8; --gray-500:#64748b; --gray-700:#334155; --gray-900:#0f172a;
+      --red-50:#fef2f2; --red-600:#dc2626;
+      --white:#fff;
+      --radius:10px; --radius-lg:20px;
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+      --transition: 0.2s ease;
+    }
+    html, body { font-family:'Inter',sans-serif; color:var(--gray-900); line-height:1.5; }
+    body {
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:2rem 1rem;
+      background:linear-gradient(135deg, var(--green-50) 0%, var(--green-100) 100%);
+    }
+    .auth-container { width:100%; max-width:440px; }
+    .auth-logo { text-align:center; margin-bottom:1.75rem; }
+    .auth-logo img { height:64px; max-width:220px; object-fit:contain; border-radius:8px; }
+    .auth-card { background:var(--white); border-radius:var(--radius-lg); padding:2.5rem; box-shadow:var(--shadow-lg); }
+    .auth-card h1 { font-size:1.5rem; font-weight:800; margin-bottom:0.3rem; }
+    .auth-card > p { color:var(--gray-500); margin-bottom:1.5rem; font-size:0.9rem; }
+    .form-group { margin-bottom:1rem; }
+    .form-group label { display:block; font-size:0.82rem; font-weight:600; color:var(--gray-700); margin-bottom:0.35rem; }
+    .form-group input {
+      width:100%; padding:0.72rem 1rem; border:1.5px solid var(--gray-200); border-radius:var(--radius);
+      font-family:inherit; font-size:0.9rem; color:var(--gray-900); background:var(--white);
+      transition:border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-group input:focus { outline:none; border-color:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,0.12); }
+    .password-wrap { position:relative; }
+    .password-toggle { position:absolute; right:0.85rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--gray-400); padding:0; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.75rem 1.5rem; font-family:inherit; font-size:0.9rem; font-weight:600; border-radius:var(--radius); border:1.5px solid transparent; cursor:pointer; transition:all var(--transition); text-decoration:none; }
+    .btn-primary { background:linear-gradient(135deg, var(--green-600), var(--green-700)); color:var(--white); border-color:var(--green-600); width:100%; box-shadow:0 4px 12px rgba(22,163,74,0.28); }
+    .btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 24px rgba(22,163,74,0.42); }
+    .btn-outline { background:transparent; color:var(--gray-700); border-color:var(--gray-200); }
+    .btn-outline:hover:not(:disabled) { background:var(--gray-100); }
+    .btn:disabled { opacity:0.65; cursor:not-allowed; }
+    .error-box { display:none; align-items:center; gap:0.5rem; background:var(--red-50); color:var(--red-600); border:1px solid #fecaca; padding:0.75rem 1rem; border-radius:var(--radius); font-size:0.875rem; margin-bottom:1rem; }
+    .error-box.show { display:flex; }
+    .success-box { display:none; align-items:center; gap:0.5rem; background:var(--green-50); color:var(--green-700); border:1px solid var(--green-200); padding:0.75rem 1rem; border-radius:var(--radius); font-size:0.875rem; }
+    .success-box.show { display:flex; }
+    .forgot-link { background:none; border:none; color:var(--green-700); font-size:0.85rem; cursor:pointer; font-family:inherit; text-decoration:underline; padding:0; }
+    .divider { display:flex; align-items:center; gap:1rem; margin:1.5rem 0; color:var(--gray-400); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; }
+    .divider::before, .divider::after { content:""; flex:1; height:1px; background:var(--gray-200); }
+    .portal-links { display:flex; flex-direction:column; gap:0.5rem; }
+    .portal-link { display:flex; align-items:center; gap:0.65rem; padding:0.75rem 1rem; background:var(--gray-50); border:1.5px solid var(--gray-200); border-radius:var(--radius); text-decoration:none; color:var(--gray-700); font-size:0.9rem; font-weight:500; transition:all var(--transition); }
+    .portal-link:hover { background:var(--gray-100); border-color:var(--green-200); }
+    .bottom-links { text-align:center; font-size:0.875rem; color:var(--gray-500); margin-top:1.25rem; }
+    .bottom-links a { color:var(--green-700); font-weight:600; text-decoration:none; }
+    .fp-panel { display:none; margin-top:1rem; }
+    .fp-panel.visible { display:block; }
+    .fp-title { font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem; }
+    .fp-subtitle { font-size:0.875rem; color:var(--gray-500); margin-bottom:1rem; }
+    .step { display:none; }
+    .step.active { display:block; }
+    .otp-inputs { display:flex; gap:0.5rem; justify-content:center; }
+    .otp-digit { width:42px; height:48px; text-align:center; font-size:1.2rem; font-weight:700; border:1.5px solid var(--gray-200); border-radius:var(--radius); }
+    .otp-digit:focus { outline:none; border-color:#22c55e; }
+    .dev-otp-box { display:none; background:#fef9c3; color:#854d0e; padding:0.6rem 0.85rem; border-radius:8px; font-size:0.82rem; margin-bottom:0.85rem; }
+    .dev-otp-box.show { display:block; }
+    .field-hint { font-size:0.75rem; color:var(--gray-400); margin-top:0.25rem; display:block; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-logo"><a href="/"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" /></a></div>
+    <div class="auth-card">
+      <h1>Welcome back</h1>
+      <p>Sign in to your account to continue</p>
+
+      <div class="error-box" id="errorBox"><i class="fas fa-exclamation-circle"></i><span id="errorMsg"></span></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" placeholder="Your password" autocomplete="current-password" required />
+            <button type="button" class="password-toggle" onclick="togglePwd('password','eyeIco')" aria-label="Show/hide"><i class="fas fa-eye" id="eyeIco"></i></button>
+          </div>
+        </div>
+        <div style="text-align:right; margin-bottom:1rem"><button type="button" class="forgot-link" onclick="showForgotPanel()">Forgot password?</button></div>
+        <button type="submit" class="btn btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      </form>
+
+      <div class="divider">or access another portal</div>
+      <div class="portal-links">
+        <a href="/driver/login.html" class="portal-link"><i class="fas fa-truck" style="color:#16a34a"></i>Driver Portal Login</a>
+      </div>
+      <div class="bottom-links">Don't have an account? <a href="/customer/register.html">Register here</a></div>
+    </div>
+
+    <div class="fp-panel auth-card" id="fpPanel">
+      <div class="fp-title"><i class="fas fa-lock-open" style="color:#16a34a"></i> Reset Password</div>
+      <div class="step active" id="fpStep1">
+        <p class="fp-subtitle">Enter your registered phone number and we'll send a 6-digit reset code via SMS.</p>
+        <div class="error-box" id="fpError1"><i class="fas fa-exclamation-circle"></i><span id="fpErrorMsg1"></span></div>
+        <div class="dev-otp-box" id="devOtpBox"><i class="fas fa-flask"></i> <strong>Dev mode — Your OTP: <span id="devOtpValue"></span></strong></div>
+        <div class="form-group">
+          <label for="fpPhone">Phone Number</label>
+          <input type="tel" id="fpPhone" placeholder="0244123456" autocomplete="tel" />
+          <span class="field-hint">e.g. 0244123456 or +233244123456</span>
+        </div>
+        <div style="display:flex; gap:0.75rem">
+          <button type="button" class="btn btn-outline" onclick="hideForgotPanel()" style="flex:1">Cancel</button>
+          <button type="button" class="btn btn-primary" id="sendCodeBtn" onclick="sendResetCode()" style="flex:2"><i class="fas fa-paper-plane"></i> Send Reset Code</button>
+        </div>
+      </div>
+      <div class="step" id="fpStep2">
+        <p class="fp-subtitle">Enter the 6-digit code sent to <strong id="fpPhoneDisplay"></strong> and your new password.</p>
+        <div class="error-box" id="fpError2"><i class="fas fa-exclamation-circle"></i><span id="fpErrorMsg2"></span></div>
+        <div class="success-box" id="fpSuccess2"><i class="fas fa-check-circle"></i><span id="fpSuccessMsg2"></span></div>
+        <div class="form-group">
+          <label>Reset Code</label>
+          <div class="otp-inputs" id="otpInputs">
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="fpNewPwd">New Password</label>
+          <div class="password-wrap">
+            <input type="password" id="fpNewPwd" placeholder="Min 8 characters" autocomplete="new-password" />
+            <button type="button" class="password-toggle" onclick="togglePwd('fpNewPwd','fpEyeIco')"><i class="fas fa-eye" id="fpEyeIco"></i></button>
+          </div>
+        </div>
+        <div style="display:flex; gap:0.75rem">
+          <button type="button" class="btn btn-outline" onclick="backToStep1()" style="flex:1"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="button" class="btn btn-primary" id="resetPwdBtn" onclick="doResetPassword()" style="flex:2"><i class="fas fa-check"></i> Reset Password</button>
+        </div>
+        <div style="text-align:center; margin-top:0.75rem"><button type="button" class="forgot-link" onclick="resendCode()">Didn't receive the code? Resend</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+  <script>
+    const existingUser = getAuthUser();
+    const authExpiry = localStorage.getItem('wm_auth_expiry');
+    if (existingUser && (!authExpiry || Date.now() < parseInt(authExpiry, 10))) {
+      const role = existingUser.role;
+      if (role === 'customer') window.location.href = '/customer/dashboard.html';
+      else if (role === 'driver') window.location.href = '/driver/dashboard.html';
+      else if (['admin', 'superadmin'].includes(role)) window.location.href = '/admin/index.html';
+    }
+
+    function togglePwd(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const ico = document.getElementById(iconId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      ico.className = `fas fa-eye${input.type === 'password' ? '' : '-slash'}`;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const errorBox = document.getElementById('errorBox');
+      errorBox.classList.remove('show');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+      btn.disabled = true;
+      try {
+        const result = await api.login(document.getElementById('email').value.trim(), document.getElementById('password').value);
+        saveAuthState(result);
+        const role = result.user.role;
+        if (role === 'customer') window.location.href = '/customer/dashboard.html';
+        else if (role === 'driver') window.location.href = '/driver/dashboard.html';
+        else if (['admin', 'superadmin'].includes(role)) window.location.href = '/admin/index.html';
+        else { document.getElementById('errorMsg').textContent = 'Unknown role. Contact support.'; errorBox.classList.add('show'); btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In'; btn.disabled = false; }
+      } catch (err) {
+        document.getElementById('errorMsg').textContent = err.message || 'Login failed';
+        errorBox.classList.add('show');
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+        btn.disabled = false;
+      }
+    });
+
+    function showForgotPanel() { document.getElementById('fpPanel').classList.add('visible'); document.getElementById('fpPanel').scrollIntoView({ behavior:'smooth' }); document.getElementById('fpPhone').focus(); }
+    function hideForgotPanel() { document.getElementById('fpPanel').classList.remove('visible'); resetFpPanel(); }
+    function resetFpPanel() { showFpStep(1); document.getElementById('fpPhone').value=''; document.getElementById('fpNewPwd').value=''; document.querySelectorAll('.otp-digit').forEach(i=>i.value=''); document.getElementById('fpError1').classList.remove('show'); document.getElementById('fpError2').classList.remove('show'); document.getElementById('fpSuccess2').classList.remove('show'); document.getElementById('devOtpBox').classList.remove('show'); }
+    function showFpStep(n) { document.querySelectorAll('.fp-panel .step').forEach(s=>s.classList.remove('active')); document.getElementById(`fpStep${n}`).classList.add('active'); }
+    function backToStep1() { showFpStep(1); document.getElementById('fpError2').classList.remove('show'); document.getElementById('fpSuccess2').classList.remove('show'); }
+
+    document.querySelectorAll('.otp-digit').forEach((input, i, inputs) => {
+      input.addEventListener('input', () => { if (input.value && i < inputs.length - 1) inputs[i + 1].focus(); });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !input.value && i > 0) inputs[i - 1].focus(); });
+    });
+
+    let lastPhone = '';
+    async function sendResetCode() {
+      const phoneInput = document.getElementById('fpPhone').value.trim();
+      const errorBox = document.getElementById('fpError1');
+      const btn = document.getElementById('sendCodeBtn');
+      errorBox.classList.remove('show');
+      if (!phoneInput) { document.getElementById('fpErrorMsg1').textContent = 'Please enter your phone number'; errorBox.classList.add('show'); return; }
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...'; btn.disabled = true;
+      try {
+        const result = await api.forgotPassword(phoneInput);
+        lastPhone = phoneInput;
+        document.getElementById('fpPhoneDisplay').textContent = phoneInput;
+        if (result.data && result.data.otp) { document.getElementById('devOtpValue').textContent = result.data.otp; document.getElementById('devOtpBox').classList.add('show'); }
+        showFpStep(2);
+      } catch (err) {
+        document.getElementById('fpErrorMsg1').textContent = err.message || 'Could not send code';
+        errorBox.classList.add('show');
+      } finally { btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Code'; btn.disabled = false; }
+    }
+    async function resendCode() { if (lastPhone) { try { const r = await api.forgotPassword(lastPhone); if (r.data && r.data.otp) { document.getElementById('devOtpValue').textContent = r.data.otp; document.getElementById('devOtpBox').classList.add('show'); } } catch (_) {} } }
+    async function doResetPassword() {
+      const code = [...document.querySelectorAll('.otp-digit')].map(i=>i.value).join('');
+      const newPassword = document.getElementById('fpNewPwd').value;
+      const errorBox = document.getElementById('fpError2');
+      const successBox = document.getElementById('fpSuccess2');
+      const btn = document.getElementById('resetPwdBtn');
+      errorBox.classList.remove('show'); successBox.classList.remove('show');
+      if (code.length !== 6) { document.getElementById('fpErrorMsg2').textContent = 'Enter the 6-digit code'; errorBox.classList.add('show'); return; }
+      if (newPassword.length < 8) { document.getElementById('fpErrorMsg2').textContent = 'Password must be at least 8 characters'; errorBox.classList.add('show'); return; }
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...'; btn.disabled = true;
+      try {
+        await api.resetPassword({ phone: lastPhone, code, newPassword });
+        document.getElementById('fpSuccessMsg2').textContent = 'Password reset. You can now sign in.';
+        successBox.classList.add('show');
+        setTimeout(() => { hideForgotPanel(); document.getElementById('email').focus(); }, 2000);
+      } catch (err) {
+        document.getElementById('fpErrorMsg2').textContent = err.message || 'Reset failed';
+        errorBox.classList.add('show');
+      } finally { btn.innerHTML = '<i class="fas fa-check"></i> Reset Password'; btn.disabled = false; }
+    }
+  </script>
+</body>
+</html>

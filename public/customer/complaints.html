@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complaints | 035 F Arkoh Waste Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/customer/dashboard.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="/customer/dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/customer/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/customer/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/customer/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Account</div>
+        <a href="/customer/notifications.html" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+        <a href="/customer/complaints.html" class="nav-item active"><i class="fas fa-comment-alt"></i> Complaints</a>
+        <a href="/customer/profile.html" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Loading...</div><div class="user-role">Customer</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Complaints</span>
+      <div class="topbar-actions"><button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Complaints</h1><p>Submit and track service complaints</p></div>
+      </div>
+
+      <div class="grid-2" style="gap:1.5rem">
+        <!-- Submit form -->
+        <div class="card">
+          <div class="card-header"><span class="card-title"><i class="fas fa-plus-circle" style="color:#16a34a"></i> New Complaint</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select class="form-control" id="category">
+                <option value="missed_collection">Missed Collection</option>
+                <option value="driver_behavior">Driver Behavior</option>
+                <option value="billing_issue">Billing Issue</option>
+                <option value="service_quality">Service Quality</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subject *</label>
+              <input type="text" class="form-control" id="subject" placeholder="Brief summary of the issue" maxlength="100" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description *</label>
+              <textarea class="form-control" id="description" rows="5" placeholder="Describe the issue in detail..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-full" id="submitBtn" onclick="submitComplaint()">
+              <i class="fas fa-paper-plane"></i> Submit Complaint
+            </button>
+          </div>
+        </div>
+
+        <!-- Complaint history -->
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">My Complaints</span></div>
+            <div id="complaintsList" style="display:flex;flex-direction:column;gap:0.75rem;padding:1rem">
+              <div class="skeleton" style="height:80px;border-radius:8px"></div>
+              <div class="skeleton" style="height:80px;border-radius:8px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['customer']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  const statusColors = { open: '#ef4444', in_review: '#eab308', resolved: '#16a34a', closed: '#64748b' };
+
+  const loadComplaints = async () => {
+    try {
+      const { data } = await api.getMyComplaints();
+      const list = document.getElementById('complaintsList');
+
+      if (!data?.complaints?.length) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-comment-slash"></i></div><div class="empty-title">No complaints submitted</div></div>`;
+        return;
+      }
+
+      list.innerHTML = data.complaints.map((c) => `
+        <div style="border:1px solid var(--gray-200);border-radius:8px;padding:0.875rem;border-left:4px solid ${statusColors[c.status] || '#64748b'}">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.3rem">
+            <div style="font-weight:600;font-size:0.875rem">${c.subject}</div>
+            ${statusBadge(c.status)}
+          </div>
+          <div style="font-size:0.75rem;color:#94a3b8;text-transform:capitalize;margin-bottom:0.4rem">${(c.category||'').replace(/_/g,' ')}</div>
+          <div style="font-size:0.8rem;color:#64748b;white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${c.description}</div>
+          <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.4rem">${formatDate(c.createdAt)}</div>
+          ${c.adminResponse ? `<div style="margin-top:0.5rem;background:#f0fdf4;border-radius:6px;padding:0.5rem;font-size:0.8rem;color:#15803d"><strong>Response:</strong> ${c.adminResponse}</div>` : ''}
+        </div>
+      `).join('');
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  const submitComplaint = async () => {
+    const category = document.getElementById('category').value;
+    const subject = document.getElementById('subject').value.trim();
+    const description = document.getElementById('description').value.trim();
+
+    if (!subject) return Toast.warning('Required', 'Please enter a subject');
+    if (!description) return Toast.warning('Required', 'Please enter a description');
+    if (description.length < 20) return Toast.warning('Too Short', 'Description must be at least 20 characters');
+
+    const btn = document.getElementById('submitBtn');
+    setButtonLoading(btn, true, 'Submitting...');
+
+    try {
+      await api.submitComplaint({ category, subject, description });
+      Toast.success('Submitted', 'Your complaint has been submitted. We will respond within 24 hours.');
+      document.getElementById('subject').value = '';
+      document.getElementById('description').value = '';
+      await loadComplaints();
+    } catch (err) {
+      Toast.error('Error', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  loadComplaints();
+</script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item active"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebarName">Admin</div>
+          <div class="user-role" id="sidebarRole">Administrator</div>
+        </div>
+        <button class="logout-btn" title="Logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Settings</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle title="Toggle theme"><i class="fas fa-moon"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>System Settings</h1><p>Platform configuration and service pricing</p></div>
+      </div>
+
+      <div class="grid-2" style="gap:1.5rem">
+
+        <!-- Pricing Configuration (editable) -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-tags"></i> Service Pricing (GHS)</h3></div>
+          <div class="card-body">
+            <form id="pricingForm" style="display:flex;flex-direction:column;gap:0.85rem">
+              <div class="pricing-row" style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.75rem;background:#f8fafc;border-radius:10px">
+                <div style="min-width:0;flex:1">
+                  <div style="font-weight:700">Basic Plan</div>
+                  <div style="font-size:0.8rem;color:#64748b">60L bin · Weekly collection</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.4rem">
+                  <span style="font-weight:700;color:#22c55e">GHS</span>
+                  <input type="number" min="0" step="0.01" id="priceBasic" class="form-control" style="width:110px;font-weight:700;color:#22c55e" />
+                </div>
+              </div>
+              <div class="pricing-row" style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.75rem;background:#f8fafc;border-radius:10px">
+                <div style="min-width:0;flex:1">
+                  <div style="font-weight:700">Standard Plan</div>
+                  <div style="font-size:0.8rem;color:#64748b">120L bin · Twice-weekly</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.4rem">
+                  <span style="font-weight:700;color:#3b82f6">GHS</span>
+                  <input type="number" min="0" step="0.01" id="priceStandard" class="form-control" style="width:110px;font-weight:700;color:#3b82f6" />
+                </div>
+              </div>
+              <div class="pricing-row" style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.75rem;background:#f8fafc;border-radius:10px">
+                <div style="min-width:0;flex:1">
+                  <div style="font-weight:700">Premium Plan</div>
+                  <div style="font-size:0.8rem;color:#64748b">240L bin · Daily collection</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.4rem">
+                  <span style="font-weight:700;color:#7c3aed">GHS</span>
+                  <input type="number" min="0" step="0.01" id="pricePremium" class="form-control" style="width:110px;font-weight:700;color:#7c3aed" />
+                </div>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;justify-content:flex-end;margin-top:0.25rem">
+                <span id="pricingMsg" style="font-size:0.82rem;color:#64748b;margin-right:auto"></span>
+                <button type="button" class="btn btn-outline" id="resetPricingBtn"><i class="fas fa-undo"></i> Reset</button>
+                <button type="submit" class="btn btn-primary" id="savePricingBtn"><i class="fas fa-save"></i> Save Pricing</button>
+              </div>
+            </form>
+            <div style="margin-top:0.75rem;padding:0.6rem 0.75rem;background:#eff6ff;border-radius:8px;font-size:0.78rem;color:#1e40af">
+              <i class="fas fa-info-circle"></i> Changes apply to new customer registrations and any customer whose plan is changed afterwards. Existing customer fees are not retroactively updated.
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing Settings -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Billing Configuration</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:0.75rem">
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;font-size:0.875rem">
+                <span style="color:#64748b">Invoice Generation</span>
+                <strong>1st of each month</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;font-size:0.875rem">
+                <span style="color:#64748b">Payment Due</span>
+                <strong>10th of each month</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;font-size:0.875rem">
+                <span style="color:#64748b">Late Fee</span>
+                <strong>GHS 10 after due date</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;font-size:0.875rem">
+                <span style="color:#64748b">Payment Reminders</span>
+                <strong>3 days, 1 day before due</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9;font-size:0.875rem">
+                <span style="color:#64748b">Overdue Check</span>
+                <strong>Daily at 1:00 AM</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0;font-size:0.875rem">
+                <span style="color:#64748b">Currency</span>
+                <strong>GHS (Ghana Cedi)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Gateway -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-credit-card"></i> Payment Gateway</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:0.75rem">
+              <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#f0fdf4;border-radius:10px;border:1.5px solid #dcfce7">
+                <img src="https://res.cloudinary.com/dftooiwf4/image/upload/v1/paystack-logo.png" onerror="this.onerror=null;this.src=''" alt="" style="height:24px">
+                <div>
+                  <div style="font-weight:700">Paystack</div>
+                  <div style="font-size:0.78rem;color:#16a34a">Connected · Test Mode</div>
+                </div>
+                <span class="badge badge-success" style="margin-left:auto">Active</span>
+              </div>
+              <div style="font-size:0.82rem;color:#64748b">
+                <div><strong>Supported methods:</strong> Card, Mobile Money, Bank Transfer, USSD</div>
+                <div style="margin-top:0.4rem"><strong>Webhook:</strong> <code style="font-size:0.75rem">/api/v1/payments/webhook</code></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMS Service -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-sms"></i> SMS Service</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:0.75rem">
+              <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#f0fdf4;border-radius:10px;border:1.5px solid #dcfce7">
+                <i class="fas fa-satellite-dish" style="font-size:1.5rem;color:#16a34a"></i>
+                <div>
+                  <div style="font-weight:700">Twilio SMS</div>
+                  <div style="font-size:0.78rem;color:#16a34a">Connected · From +1 (814) 809-8035</div>
+                </div>
+                <span class="badge badge-success" style="margin-left:auto">Active</span>
+              </div>
+              <div style="font-size:0.82rem;color:#64748b">
+                <div><strong>Sends:</strong> Welcome SMS, payment confirmations, reminders, OTP codes</div>
+                <div style="margin-top:0.4rem"><strong>From number:</strong> <code>+18148098035</code></div>
+                <div style="margin-top:0.4rem;color:#f59e0b"><i class="fas fa-exclamation-triangle"></i> <strong>Trial mode:</strong> Can only send to verified numbers. <a href="https://console.twilio.com/us1/develop/phone-numbers/manage/verified" target="_blank" style="color:#16a34a">Verify numbers here</a> or upgrade your Twilio account to send to any number.</div>
+              </div>
+              <a href="https://console.twilio.com" target="_blank" class="btn btn-outline btn-sm" style="width:fit-content">
+                <i class="fas fa-external-link-alt"></i> Twilio Console
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="card" style="grid-column:1/-1">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-server"></i> System Information</h3></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+              <div style="padding:1rem;background:#f8fafc;border-radius:10px;text-align:center">
+                <div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Platform</div>
+                <div style="font-weight:700">Node.js + Express</div>
+              </div>
+              <div style="padding:1rem;background:#f8fafc;border-radius:10px;text-align:center">
+                <div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Database</div>
+                <div style="font-weight:700">MongoDB Atlas</div>
+              </div>
+              <div style="padding:1rem;background:#f8fafc;border-radius:10px;text-align:center">
+                <div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">File Storage</div>
+                <div style="font-weight:700">Cloudinary</div>
+              </div>
+              <div style="padding:1rem;background:#f8fafc;border-radius:10px;text-align:center">
+                <div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Log Retention</div>
+                <div style="font-weight:700">90 Days</div>
+              </div>
+              <div style="padding:1rem;background:#f8fafc;border-radius:10px;text-align:center">
+                <div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Authentication</div>
+                <div style="font-weight:700">JWT + Cookies</div>
+              </div>
+              <div style="padding:1rem;background:#f8fafc;border-radius:10px;text-align:center">
+                <div style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem">Version</div>
+                <div style="font-weight:700" id="appVersion">&mdash;</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create Admin Account -->
+        <div class="card" style="grid-column:1/-1">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-user-shield"></i> Admin Account Setup</h3></div>
+          <div class="card-body">
+            <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.875rem;color:#dc2626">
+              <strong><i class="fas fa-exclamation-triangle"></i> Security Notice:</strong> The initial admin account should only be created once. Store credentials securely.
+            </div>
+            <form id="createAdminForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="adminName" class="form-control" placeholder="Admin Name" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="adminEmail" class="form-control" placeholder="admin@company.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="adminPhone" class="form-control" placeholder="0244123456" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="adminPassword" class="form-control" placeholder="Strong password" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Secret Key</label>
+                <input type="password" id="adminSecret" class="form-control" placeholder="Value of INIT_SECRET in .env" />
+              </div>
+            </form>
+            <button class="btn btn-primary" style="margin-top:0.5rem" onclick="createAdminAccount()">
+              <i class="fas fa-user-plus"></i> Create Superadmin Account
+            </button>
+            <div id="adminCreateResult" style="margin-top:1rem;font-size:0.875rem"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  // Load app version from health endpoint
+  fetch('/api/health').then(r => r.json()).then(data => {
+    document.getElementById('appVersion').textContent = data.environment === 'production' ? 'Production' : 'Development';
+  }).catch(() => {});
+
+  const createAdminAccount = async () => {
+    const fullName = document.getElementById('adminName').value.trim();
+    const email = document.getElementById('adminEmail').value.trim();
+    const phone = document.getElementById('adminPhone').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const secret = document.getElementById('adminSecret').value;
+    const resultDiv = document.getElementById('adminCreateResult');
+
+    if (!fullName || !email || !phone || !password || !secret) {
+      resultDiv.innerHTML = '<span style="color:#ef4444">All fields are required.</span>';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/v1/auth/init-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, phone, password, secret }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        resultDiv.innerHTML = `<span style="color:#16a34a"><i class="fas fa-check-circle"></i> Admin account created successfully! Email: ${email}</span>`;
+        document.getElementById('createAdminForm').reset();
+      } else {
+        resultDiv.innerHTML = `<span style="color:#ef4444">${data.message}</span>`;
+      }
+    } catch (e) {
+      resultDiv.innerHTML = `<span style="color:#ef4444">Request failed: ${e.message}</span>`;
+    }
+  };
+
+  // ── Pricing editor ────────────────────────────────────────────────
+  let lastPricing = { basic: 50, standard: 80, premium: 120 };
+
+  const renderPricing = (p) => {
+    document.getElementById('priceBasic').value    = p.basic;
+    document.getElementById('priceStandard').value = p.standard;
+    document.getElementById('pricePremium').value  = p.premium;
+  };
+
+  const loadPricing = async () => {
+    try {
+      const { data } = await api.getPricing();
+      lastPricing = { ...data.pricing };
+      renderPricing(data.pricing);
+    } catch (err) {
+      Toast.error('Pricing', err.message);
+    }
+  };
+
+  document.getElementById('pricingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('savePricingBtn');
+    const msg = document.getElementById('pricingMsg');
+    const payload = {
+      basic:    parseFloat(document.getElementById('priceBasic').value),
+      standard: parseFloat(document.getElementById('priceStandard').value),
+      premium:  parseFloat(document.getElementById('pricePremium').value),
+    };
+    for (const [k, v] of Object.entries(payload)) {
+      if (!Number.isFinite(v) || v < 0) {
+        msg.textContent = `Invalid ${k} price`;
+        msg.style.color = '#dc2626';
+        return;
+      }
+    }
+    setButtonLoading(btn, true, 'Saving...');
+    msg.textContent = '';
+    try {
+      const { data } = await api.updatePricing(payload);
+      lastPricing = { ...data.pricing };
+      renderPricing(data.pricing);
+      msg.textContent = 'Saved.';
+      msg.style.color = '#16a34a';
+      Toast.success('Pricing updated', 'Service pricing saved successfully');
+    } catch (err) {
+      msg.textContent = err.message;
+      msg.style.color = '#dc2626';
+      Toast.error('Failed to save', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  });
+
+  document.getElementById('resetPricingBtn').addEventListener('click', () => {
+    renderPricing(lastPricing);
+    document.getElementById('pricingMsg').textContent = '';
+  });
+
+  loadPricing();
+
+  Object.assign(window, { createAdminAccount });
+</script>
+</body>
+</html>

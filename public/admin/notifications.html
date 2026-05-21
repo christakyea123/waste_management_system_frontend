@@ -1,0 +1,266 @@
+﻿﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMS Center | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item active"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Admin</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">SMS Notification Center</span>
+      <div class="topbar-actions"><button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button></div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>SMS Center</h1><p>Send targeted SMS notifications via Hubtel</p></div>
+      </div>
+
+      <div class="grid-2" style="gap:1.5rem">
+        <!-- Compose SMS -->
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="fas fa-paper-plane" style="color:#16a34a"></i> Compose Message</span></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Target Group *</label>
+                <select class="form-control" id="targetGroup" onchange="updateRecipientCount()">
+                  <option value="all_customers">All Customers</option>
+                  <option value="overdue_customers">Overdue Invoice Customers</option>
+                  <option value="all_drivers">All Drivers</option>
+                </select>
+                <div class="form-hint" id="recipientHint">Loading count...</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Message Template (Optional)</label>
+                <select class="form-control" id="templateSelect" onchange="applyTemplate()">
+                  <option value="">Select a template or type custom...</option>
+                  <option value="payment_reminder">Payment Reminder</option>
+                  <option value="collection_reminder">Collection Reminder</option>
+                  <option value="service_update">Service Update</option>
+                  <option value="custom">Custom Message</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Message *</label>
+                <textarea class="form-control" id="smsMessage" rows="5" maxlength="160" placeholder="Type your message here..."></textarea>
+                <div class="form-hint"><span id="charCount">0</span>/160 characters &bull; <span id="smsCount">1 SMS</span></div>
+              </div>
+              <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem;margin-bottom:1rem;font-size:0.85rem;color:#15803d">
+                <i class="fas fa-info-circle"></i> Messages sent via Hubtel. Standard SMS rates apply.
+              </div>
+              <button class="btn btn-primary btn-full" id="sendBtn" onclick="sendBulkSms()">
+                <i class="fas fa-paper-plane"></i> Send SMS Campaign
+              </button>
+            </div>
+          </div>
+
+          <!-- SMS Templates -->
+          <div class="card" style="margin-top:1rem">
+            <div class="card-header"><span class="card-title">Quick Templates</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:0.5rem">
+              <button class="btn btn-secondary" style="text-align:left;justify-content:flex-start" onclick="fillTemplate('Your waste collection is scheduled for tomorrow. Please ensure your bin is placed outside by 6:00 AM.')">
+                <i class="fas fa-truck" style="color:#16a34a"></i> Collection Reminder
+              </button>
+              <button class="btn btn-secondary" style="text-align:left;justify-content:flex-start" onclick="fillTemplate('Friendly reminder: Your WasteManagement invoice is due in 3 days. Please pay at wastemanagement.com/pay to avoid service interruption.')">
+                <i class="fas fa-credit-card" style="color:#eab308"></i> Payment Reminder
+              </button>
+              <button class="btn btn-secondary" style="text-align:left;justify-content:flex-start" onclick="fillTemplate('Important: Your waste collection invoice is OVERDUE. Please pay immediately to restore service. Visit wastemanagement.com/pay')">
+                <i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Overdue Alert
+              </button>
+              <button class="btn btn-secondary" style="text-align:left;justify-content:flex-start" onclick="fillTemplate('We will be conducting maintenance on [DATE]. Collections may be delayed. We apologize for any inconvenience.')">
+                <i class="fas fa-tools" style="color:#3b82f6"></i> Service Notice
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats & History -->
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">SMS Statistics</span></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div style="background:#f0fdf4;border-radius:10px;padding:1rem;text-align:center">
+                  <div style="font-size:2rem;font-weight:800;color:#16a34a" id="statSent">&mdash;</div>
+                  <div style="font-size:0.8rem;color:#64748b">Total Sent</div>
+                </div>
+                <div style="background:#f0f9ff;border-radius:10px;padding:1rem;text-align:center">
+                  <div style="font-size:2rem;font-weight:800;color:#3b82f6" id="statDelivered">&mdash;</div>
+                  <div style="font-size:0.8rem;color:#64748b">Delivered</div>
+                </div>
+                <div style="background:#fef9c3;border-radius:10px;padding:1rem;text-align:center">
+                  <div style="font-size:2rem;font-weight:800;color:#ca8a04" id="statPending">&mdash;</div>
+                  <div style="font-size:0.8rem;color:#64748b">Pending</div>
+                </div>
+                <div style="background:#fef2f2;border-radius:10px;padding:1rem;text-align:center">
+                  <div style="font-size:2rem;font-weight:800;color:#ef4444" id="statFailed">&mdash;</div>
+                  <div style="font-size:0.8rem;color:#64748b">Failed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:1rem">
+            <div class="card-header"><span class="card-title">Automated Campaigns</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-radius:8px;border:1px solid #e2e8f0">
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">Payment Reminders</div>
+                  <div style="font-size:0.75rem;color:#64748b">Auto-sent 3 days before due date</div>
+                </div>
+                <span class="badge badge-success">Active</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-radius:8px;border:1px solid #e2e8f0">
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">Collection Confirmations</div>
+                  <div style="font-size:0.75rem;color:#64748b">Auto-sent after driver marks collected</div>
+                </div>
+                <span class="badge badge-success">Active</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-radius:8px;border:1px solid #e2e8f0">
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">Missed Collection Alerts</div>
+                  <div style="font-size:0.75rem;color:#64748b">Auto-sent on missed pickup</div>
+                </div>
+                <span class="badge badge-success">Active</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-radius:8px;border:1px solid #e2e8f0">
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">Overdue Invoice Alerts</div>
+                  <div style="font-size:0.75rem;color:#64748b">Daily at 9AM for overdue invoices</div>
+                </div>
+                <span class="badge badge-success">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin', 'superadmin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  document.getElementById('smsMessage').addEventListener('input', (e) => {
+    const len = e.target.value.length;
+    document.getElementById('charCount').textContent = len;
+    document.getElementById('smsCount').textContent = `${Math.ceil(len / 160) || 1} SMS`;
+  });
+
+  const templates = {
+    payment_reminder: 'Friendly reminder: Your WasteManagement invoice is due soon. Please pay at wastemanagement.com/pay to avoid service interruption.',
+    collection_reminder: 'Your waste collection is scheduled for tomorrow. Please ensure your bin is placed outside by 6:00 AM. Thank you!',
+    service_update: 'Important service update from WasteManagement. Please visit wastemanagement.com for details.',
+    custom: '',
+  };
+
+  const applyTemplate = () => {
+    const val = document.getElementById('templateSelect').value;
+    if (val && templates[val] !== undefined) {
+      document.getElementById('smsMessage').value = templates[val];
+      document.getElementById('charCount').textContent = templates[val].length;
+    }
+  };
+
+  const fillTemplate = (msg) => {
+    document.getElementById('smsMessage').value = msg;
+    document.getElementById('charCount').textContent = msg.length;
+  };
+
+  const updateRecipientCount = () => {
+    const group = document.getElementById('targetGroup').value;
+    const hints = {
+      all_customers: 'Will be sent to all active customers',
+      overdue_customers: 'Will be sent to customers with overdue invoices',
+      all_drivers: 'Will be sent to all active drivers',
+    };
+    document.getElementById('recipientHint').textContent = hints[group] || '';
+  };
+
+  const sendBulkSms = async () => {
+    const message = document.getElementById('smsMessage').value.trim();
+    const targetGroup = document.getElementById('targetGroup').value;
+    if (!message) return Toast.warning('Required', 'Please enter a message');
+    if (message.length > 160) return Toast.warning('Too Long', 'Message cannot exceed 160 characters');
+
+    const btn = document.getElementById('sendBtn');
+    setButtonLoading(btn, true, 'Sending...');
+
+    try {
+      const { data } = await api.sendBulkSms({ message, targetGroup });
+      Toast.success('SMS Sent!', `${data.sent} of ${data.total} messages sent successfully`);
+      document.getElementById('smsMessage').value = '';
+      document.getElementById('charCount').textContent = '0';
+    } catch (err) {
+      Toast.error('Error', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  // Mock stats (would come from notification history endpoint)
+  document.getElementById('statSent').textContent = '&mdash;';
+  document.getElementById('statDelivered').textContent = '&mdash;';
+  document.getElementById('statPending').textContent = '&mdash;';
+  document.getElementById('statFailed').textContent = '&mdash;';
+
+  updateRecipientCount();
+</script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoices | WasteManagement Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><a href="/admin/index.html" class="sidebar-logo"><img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="sidebar-logo-img" /></a></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <a href="/admin/index.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/admin/analytics.html" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="/admin/customers.html" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+        <a href="/admin/drivers.html" class="nav-item"><i class="fas fa-id-card"></i> Drivers</a>
+        <a href="/admin/collections.html" class="nav-item"><i class="fas fa-truck"></i> Collections</a>
+        <a href="/admin/routes.html" class="nav-item"><i class="fas fa-route"></i> Routes</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Finance</div>
+        <a href="/admin/invoices.html" class="nav-item active"><i class="fas fa-file-invoice"></i> Invoices</a>
+        <a href="/admin/payments.html" class="nav-item"><i class="fas fa-credit-card"></i> Payments</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <a href="/admin/notifications.html" class="nav-item"><i class="fas fa-sms"></i> SMS Center</a>
+        <a href="/admin/complaints.html" class="nav-item"><i class="fas fa-comment-alt"></i> Complaints</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href="/admin/logs.html" class="nav-item"><i class="fas fa-list-alt"></i> Activity Logs</a>
+        <a href="/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-details"><div class="user-name" id="sidebarName">Admin</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <span class="topbar-title">Invoice Management</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div><h1>Invoices</h1><p id="invoiceCount">Loading invoices...</p></div>
+        <button class="btn btn-primary" onclick="generateInvoices()">
+          <i class="fas fa-file-invoice"></i> Generate Monthly Invoices
+        </button>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="stats-grid" id="invoiceSummary">
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+        <div class="stat-card"><div class="skeleton" style="height:70px"></div></div>
+      </div>
+
+      <div class="card" style="margin:1rem 0">
+        <div class="card-body" style="padding:1rem">
+          <div class="filter-bar">
+            <select class="form-control" id="statusFilter" style="width:140px" onchange="loadInvoices(1)">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+              <option value="failed">Failed</option>
+            </select>
+            <select class="form-control" id="monthFilter" style="width:130px">
+              <option value="">All Months</option>
+              ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}</option>`).join('')}
+            </select>
+            <select class="form-control" id="yearFilter" style="width:100px">
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+            <button class="btn btn-secondary" onclick="loadInvoices(1)"><i class="fas fa-filter"></i> Filter</button>
+            <button class="btn btn-outline" onclick="sendReminders()"><i class="fas fa-bell"></i> Send Reminders</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Customer</th>
+                <th>Period</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTable">
+              <tr><td colspan="7"><div class="skeleton" style="height:40px;margin:0.5rem 1rem"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer" id="paginationContainer"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/js/bootstrap.js?v=1"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/utils.js?v=7"></script>
+<script>
+  const user = requireAuth(['admin', 'superadmin']);
+  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  initSidebar(); initTheme(); populateSidebarUser(user);
+
+  const loadInvoices = async (page = 1) => {
+    const status = document.getElementById('statusFilter').value;
+    const month = document.getElementById('monthFilter').value;
+    const year = document.getElementById('yearFilter').value;
+    let params = `?page=${page}&limit=20`;
+    if (status) params += `&status=${status}`;
+    if (month) params += `&month=${month}`;
+    if (year) params += `&year=${year}`;
+
+    try {
+      const res = await api.getAdminInvoices(params);
+      const { data, pagination } = res;
+      document.getElementById('invoiceCount').textContent = `${pagination.total} invoices total`;
+
+      // Summary
+      const pending = data.filter((i) => i.status === 'pending').length;
+      const paid = data.filter((i) => i.status === 'paid').length;
+      const overdue = data.filter((i) => i.status === 'overdue').length;
+      const totalRevenue = data.filter((i) => i.status === 'paid').reduce((s, i) => s + (i.totalAmount || i.amount), 0);
+
+      document.getElementById('invoiceSummary').innerHTML = `
+        <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><div class="stat-value">${pending}</div><div class="stat-label">Pending</div></div></div>
+        <div class="stat-card"><div class="stat-icon red"><i class="fas fa-exclamation"></i></div><div class="stat-info"><div class="stat-value">${overdue}</div><div class="stat-label">Overdue</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check"></i></div><div class="stat-info"><div class="stat-value">${formatCurrency(totalRevenue)}</div><div class="stat-label">Revenue (page)</div></div></div>
+      `;
+
+      const tbody = document.getElementById('invoicesTable');
+      if (!data?.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="fas fa-file-invoice"></i></div><div class="empty-title">No invoices found</div></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map((inv) => `
+        <tr>
+          <td><span style="font-weight:600;font-size:0.875rem">${inv.invoiceNumber}</span></td>
+          <td>
+            <div>
+              <div style="font-weight:500;font-size:0.875rem">${inv.customer?.user?.fullName || 'N/A'}</div>
+              <div style="font-size:0.75rem;color:#64748b">${inv.customer?.customerId || ''}</div>
+            </div>
+          </td>
+          <td>${monthNames[inv.month - 1]} ${inv.year}</td>
+          <td><strong>${formatCurrency(inv.totalAmount || inv.amount)}</strong>${inv.lateFee > 0 ? `<br><small style="color:#ef4444">+${formatCurrency(inv.lateFee)} late fee</small>` : ''}</td>
+          <td class="${inv.status === 'overdue' ? 'text-danger' : ''}">${formatDate(inv.dueDate)}</td>
+          <td>${statusBadge(inv.status)}</td>
+          <td>
+            <div style="display:flex;gap:0.4rem">
+              <button class="btn btn-sm btn-outline" onclick="downloadPdf('${inv._id}','${inv.invoiceNumber}')" title="Download PDF"><i class="fas fa-download"></i></button>
+              ${inv.status !== 'paid' ? `<button class="btn btn-sm btn-secondary" onclick="sendReminder('${inv._id}')" title="Send reminder"><i class="fas fa-bell"></i></button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      const paginationContainer = document.getElementById('paginationContainer');
+      paginationContainer.innerHTML = '';
+      if (pagination.pages > 1) paginationContainer.appendChild(renderPagination(pagination, loadInvoices));
+
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  const generateInvoices = async () => {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    if (!confirm(`Generate invoices for ${monthNames[month - 1]} ${year}?`)) return;
+    const btn = document.querySelector('[onclick="generateInvoices()"]');
+    setButtonLoading(btn, true, 'Generating...');
+    try {
+      const { data, message } = await api.generateInvoices(month, year);
+      Toast.success('Done', message || `${data.created} invoice(s) created, ${data.skipped} skipped`);
+      loadInvoices(1);
+    } catch (err) {
+      Toast.error('Error', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  const sendReminders = async () => {
+    if (!confirm('Send payment reminders to all pending/overdue customers?')) return;
+    const btn = document.querySelector('[onclick="sendReminders()"]');
+    setButtonLoading(btn, true, 'Sending...');
+    try {
+      const { message } = await api.sendAllReminders();
+      Toast.success('Done', message || 'Reminders sent');
+    } catch (err) {
+      Toast.error('Error', err.message);
+    } finally {
+      setButtonLoading(btn, false);
+    }
+  };
+
+  const sendReminder = async (id) => {
+    try {
+      const { message } = await api.sendInvoiceReminder(id);
+      Toast.success('Sent', message || 'Reminder SMS sent');
+    } catch (err) {
+      Toast.error('Error', err.message);
+    }
+  };
+
+  const downloadPdf = async (id, number) => {
+    try {
+      Toast.info('Generating', 'Preparing PDF...');
+      const blob = await api.downloadInvoicePdf(id);
+      downloadBlob(blob, `invoice-${number}.pdf`);
+    } catch (err) {
+      Toast.error('Error', 'Failed to download PDF');
+    }
+  };
+
+  // Set default month/year to current
+  const now = new Date();
+  document.getElementById('monthFilter').value = now.getMonth() + 1;
+  document.getElementById('yearFilter').value = now.getFullYear();
+
+  loadInvoices(1);
+</script>
+</body>
+</html>
