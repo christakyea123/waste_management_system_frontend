@@ -183,18 +183,18 @@
               <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:#f0fdf4;border-radius:10px;border:1.5px solid #dcfce7">
                 <i class="fas fa-satellite-dish" style="font-size:1.5rem;color:#16a34a"></i>
                 <div>
-                  <div style="font-weight:700">Twilio SMS</div>
-                  <div style="font-size:0.78rem;color:#16a34a">Connected · From +1 (814) 809-8035</div>
+                  <div style="font-weight:700">mNotify SMS</div>
+                  <div style="font-size:0.78rem;color:#16a34a">Configured via <code>MNOTIFY_API_KEY</code></div>
                 </div>
                 <span class="badge badge-success" style="margin-left:auto">Active</span>
               </div>
               <div style="font-size:0.82rem;color:#64748b">
                 <div><strong>Sends:</strong> Welcome SMS, payment confirmations, reminders, OTP codes</div>
-                <div style="margin-top:0.4rem"><strong>From number:</strong> <code>+18148098035</code></div>
-                <div style="margin-top:0.4rem;color:#f59e0b"><i class="fas fa-exclamation-triangle"></i> <strong>Trial mode:</strong> Can only send to verified numbers. <a href="https://console.twilio.com/us1/develop/phone-numbers/manage/verified" target="_blank" style="color:#16a34a">Verify numbers here</a> or upgrade your Twilio account to send to any number.</div>
+                <div style="margin-top:0.4rem"><strong>Sender ID:</strong> set in <code>MNOTIFY_SENDER_ID</code> env var (must be pre-approved by mNotify, max 11 chars)</div>
+                <div style="margin-top:0.4rem;color:#64748b"><i class="fas fa-info-circle"></i> Top up SMS credits and manage delivery reports in the mNotify dashboard.</div>
               </div>
-              <a href="https://console.twilio.com" target="_blank" class="btn btn-outline btn-sm" style="width:fit-content">
-                <i class="fas fa-external-link-alt"></i> Twilio Console
+              <a href="https://app.mnotify.com" target="_blank" class="btn btn-outline btn-sm" style="width:fit-content">
+                <i class="fas fa-external-link-alt"></i> mNotify Dashboard
               </a>
             </div>
           </div>

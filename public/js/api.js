@@ -78,6 +78,7 @@ class ApiClient {
   forgotPassword(phone)   { return this.post('/auth/forgot-password', { phone }); }
   resetPassword(data)     { return this.post('/auth/reset-password', data); }
   getPublicRoutes()       { return this.get('/auth/routes'); }
+  getPublicPricing()      { return this.get('/auth/pricing'); }
 
   // Admin
   getDashboard()                          { return this.get('/admin/dashboard'); }
@@ -126,6 +127,7 @@ class ApiClient {
   getDriverDashboard()                    { return this.get('/driver/dashboard'); }
   getDriverCustomers(params = '')         { return this.get(`/driver/customers${params}`); }
   getDriverCollections(params = '')       { return this.get(`/driver/collections${params}`); }
+  getDriverCollectionsSummary(params = '') { return this.get(`/driver/collections/summary${params}`); }
   updateCollectionStatus(id, formData)    { return this.putForm(`/driver/collections/${id}`, formData); }
   updateDriverLocation(data)              { return this.put('/driver/location', data); }
 

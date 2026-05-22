@@ -243,10 +243,8 @@
             </div>
             <div class="form-group" id="g_binType">
               <label for="binType">Waste Bin Type *</label>
-              <select id="binType" name="binType">
-                <option value="basic">Basic &mdash; GHS 50/mo (60L)</option>
-                <option value="standard">Standard &mdash; GHS 80/mo (120L)</option>
-                <option value="premium">Premium &mdash; GHS 120/mo (240L)</option>
+              <select id="binType" name="binType" disabled>
+                <option value="">Loading plans…</option>
               </select>
             </div>
           </div>
@@ -340,16 +338,54 @@
   </div>
 
   <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=7"></script>
+<script src="/js/api.js?v=8"></script>
   <script>
     let currentStep = 1;
     let locationCaptured = false;
 
-    // Pre-fill plan from URL param (?plan=basic|standard|premium)
+    // Bin metadata (size + frequency) is presentational only — pricing is the
+    // source-of-truth field and comes from the backend at /api/v1/auth/pricing.
+    // Keeping size/freq client-side avoids another DB lookup on every page hit;
+    // if these ever become admin-configurable, move them into Settings too.
+    const BIN_META = {
+      basic:    { name: 'Basic',    size: '60L bin',  freq: 'Weekly collection' },
+      standard: { name: 'Standard', size: '120L bin', freq: 'Twice-weekly collection' },
+      premium:  { name: 'Premium',  size: '240L bin', freq: 'Daily collection' },
+    };
+
+    // Live pricing, populated from the backend before the user can interact with
+    // the dropdown. Default to env fallbacks so the page is never *blank*, but
+    // we overwrite immediately after the fetch resolves.
+    let livePricing = { basic: 50, standard: 80, premium: 120 };
+
     const planParam = new URLSearchParams(window.location.search).get('plan');
-    if (planParam && ['basic','standard','premium'].includes(planParam)) {
-      document.getElementById('binType').value = planParam;
-    }
+
+    const renderBinOptions = () => {
+      const sel = document.getElementById('binType');
+      const previous = sel.value || planParam;
+      sel.innerHTML = Object.keys(BIN_META).map((key) => {
+        const m = BIN_META[key];
+        const price = livePricing[key];
+        return `<option value="${key}">${m.name} &mdash; GHS ${price}/mo (${m.size.replace(' bin', '')})</option>`;
+      }).join('');
+      // Restore the URL-param / previously-selected plan if it's still valid.
+      if (previous && BIN_META[previous]) sel.value = previous;
+      sel.disabled = false;
+    };
+
+    // Fire-and-forget: if the API is unreachable we fall back to the env defaults
+    // already in `livePricing` — better to show stale numbers than a broken page.
+    (async () => {
+      try {
+        const res = await api.getPublicPricing();
+        const p = res?.data?.pricing;
+        if (p && typeof p.basic === 'number') livePricing = p;
+      } catch (e) {
+        console.warn('[register] pricing fetch failed, using defaults:', e?.message);
+      } finally {
+        renderBinOptions();
+      }
+    })();
 
     // ── Routes dropdown ──
     (async () => {
@@ -532,15 +568,14 @@
     const originalShowStep = showStep;
 
     // ── Plan Summary ──
+    // Reads from livePricing + BIN_META so the summary on step 3 stays in
+    // sync with whatever the admin set in /admin/settings.
     const updatePlanSummary = () => {
-      const plans = {
-        basic:    { name: 'Basic',    price: 50,  size: '60L bin',  freq: 'Weekly collection' },
-        standard: { name: 'Standard', price: 80,  size: '120L bin', freq: 'Twice-weekly collection' },
-        premium:  { name: 'Premium',  price: 120, size: '240L bin', freq: 'Daily collection' },
-      };
-      const p = plans[document.getElementById('binType').value] || plans.basic;
+      const key = document.getElementById('binType').value || 'basic';
+      const meta = BIN_META[key] || BIN_META.basic;
+      const price = livePricing[key] ?? livePricing.basic;
       document.getElementById('planSummary').innerHTML =
-        `<strong>${p.name} Plan</strong> &mdash; GHS ${p.price}/month<br>${p.size} &bull; ${p.freq}`;
+        `<strong>${meta.name} Plan</strong> &mdash; GHS ${price}/month<br>${meta.size} &bull; ${meta.freq}`;
     };
 
     // Intercept showStep to auto-trigger GPS on step 2

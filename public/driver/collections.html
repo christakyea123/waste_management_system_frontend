@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,13 +8,81 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link rel="stylesheet" href="/css/dashboard.css?v=7" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=9" />
   <style>
-    .collection-card { background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:1rem;transition:all var(--transition); }
-    .collection-card.status-picked { border-left:4px solid var(--green-500); }
-    .collection-card.status-missed { border-left:4px solid var(--red-500); }
-    .collection-card.status-scheduled { border-left:4px solid var(--yellow-500); }
-    .collections-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem; }
+    /* ── Status summary chips ───────────────────────────────────────── */
+    .summary-chips {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.55rem 0.95rem; border-radius: 999px;
+      background: #fff; border: 1.5px solid #e2e8f0;
+      font-size: 0.85rem; font-weight: 600; color: #334155;
+      cursor: pointer; transition: all 0.15s ease;
+      user-select: none;
+    }
+    .chip:hover { border-color: #94a3b8; }
+    .chip.active { border-color: currentColor; box-shadow: 0 0 0 3px rgba(0,0,0,0.04); }
+    .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .chip .count {
+      background: #f1f5f9; color: #475569;
+      padding: 0.1rem 0.5rem; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700;
+    }
+    .chip.c-all     { color: #0f172a; } .chip.c-all .dot     { background: #0f172a; }
+    .chip.c-sched   { color: #a16207; } .chip.c-sched .dot   { background: #eab308; }
+    .chip.c-picked  { color: #15803d; } .chip.c-picked .dot  { background: #16a34a; }
+    .chip.c-missed  { color: #b91c1c; } .chip.c-missed .dot  { background: #ef4444; }
+    .chip.c-resch   { color: #c2410c; } .chip.c-resch .dot   { background: #fb923c; }
+    .chip.c-blocked { color: #7c3aed; } .chip.c-blocked .dot { background: #8b5cf6; }
+    .chip.active.c-sched   { background: #fef9c3; }
+    .chip.active.c-picked  { background: #dcfce7; }
+    .chip.active.c-missed  { background: #fee2e2; }
+    .chip.active.c-resch   { background: #ffedd5; }
+    .chip.active.c-blocked { background: #ede9fe; }
+    .chip.active.c-all     { background: #f1f5f9; }
+
+    /* ── Collection cards ──────────────────────────────────────────── */
+    .collections-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1rem;
+    }
+    .collection-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 1rem 1rem 0.85rem;
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
+      display: flex; flex-direction: column;
+    }
+    .collection-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-1px); }
+    .collection-card.status-scheduled      { border-left: 4px solid #eab308; }
+    .collection-card.status-picked         { border-left: 4px solid #16a34a; }
+    .collection-card.status-missed         { border-left: 4px solid #ef4444; }
+    .collection-card.status-rescheduled    { border-left: 4px solid #fb923c; }
+    .collection-card.status-blocked_access { border-left: 4px solid #8b5cf6; }
+
+    .meta-line { font-size: 0.8rem; color: #64748b; margin-bottom: 0.25rem; }
+    .meta-line i { width: 14px; }
+    .status-detail {
+      margin-top: 0.5rem; padding: 0.55rem 0.7rem; border-radius: 8px;
+      font-size: 0.78rem; line-height: 1.35;
+    }
+    .status-detail.picked     { background: #f0fdf4; color: #15803d; }
+    .status-detail.missed     { background: #fef2f2; color: #b91c1c; }
+    .status-detail.resched    { background: #fff7ed; color: #c2410c; }
+    .status-detail.blocked    { background: #f5f3ff; color: #7c3aed; }
+    .status-detail strong { font-weight: 700; }
+
+    .card-actions {
+      display: flex; gap: 0.4rem; margin-top: 0.75rem; padding-top: 0.75rem;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    @media (max-width: 640px) {
+      .summary-chips { gap: 0.4rem; }
+      .chip { padding: 0.45rem 0.7rem; font-size: 0.8rem; }
+    }
   </style>
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
 </head>
@@ -49,29 +117,44 @@
     <header class="topbar">
       <button class="topbar-btn sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
       <span class="topbar-title">My Collections</span>
-      <div class="topbar-actions"><button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button></div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" id="refreshBtn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+        <button class="topbar-btn" data-theme-toggle><i class="fas fa-moon"></i></button>
+      </div>
     </header>
 
     <div class="page-content">
       <div class="page-header">
-        <div><h1>Collections</h1><p id="totalCount">Loading...</p></div>
+        <div><h1>Collections</h1><p id="totalCount">Loading…</p></div>
       </div>
 
-      <div class="filter-bar" style="margin-bottom:1rem">
-        <select class="form-control" id="statusFilter" style="width:140px" onchange="loadCollections(1)">
-          <option value="scheduled">Scheduled</option>
-          <option value="">All Status</option>
+      <!-- Status summary chips (clickable filters) -->
+      <div class="summary-chips" id="summaryChips">
+        <div class="skeleton" style="height:36px;width:120px;border-radius:999px"></div>
+        <div class="skeleton" style="height:36px;width:120px;border-radius:999px"></div>
+        <div class="skeleton" style="height:36px;width:120px;border-radius:999px"></div>
+        <div class="skeleton" style="height:36px;width:120px;border-radius:999px"></div>
+      </div>
+
+      <div class="filter-bar" style="margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">
+        <select class="form-control" id="statusFilter" style="width:170px">
+          <option value="">All statuses</option>
+          <option value="scheduled">Scheduled (pending)</option>
           <option value="picked">Picked</option>
           <option value="missed">Missed</option>
+          <option value="rescheduled">Rescheduled</option>
+          <option value="blocked_access">Blocked access</option>
         </select>
-        <input type="date" class="form-control" id="dateFilter" style="width:160px" onchange="loadCollections(1)" />
-        <button class="btn btn-outline" onclick="clearFilters()"><i class="fas fa-times"></i> Clear</button>
+        <input type="date" class="form-control" id="dateFilter" style="width:170px" />
+        <button class="btn btn-sm btn-outline" id="todayBtn" type="button">Today</button>
+        <button class="btn btn-sm btn-outline" id="anyDateBtn" type="button">Any date</button>
+        <button class="btn btn-sm btn-outline" id="clearBtn" type="button"><i class="fas fa-times"></i> Clear</button>
       </div>
 
       <div id="collectionsGrid" class="collections-grid">
-        <div class="skeleton" style="height:160px;border-radius:12px"></div>
-        <div class="skeleton" style="height:160px;border-radius:12px"></div>
-        <div class="skeleton" style="height:160px;border-radius:12px"></div>
+        <div class="skeleton" style="height:170px;border-radius:12px"></div>
+        <div class="skeleton" style="height:170px;border-radius:12px"></div>
+        <div class="skeleton" style="height:170px;border-radius:12px"></div>
       </div>
       <div id="paginationContainer" style="margin-top:1rem"></div>
     </div>
@@ -87,176 +170,343 @@
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Status *</label>
-        <select class="form-control" id="newStatus" onchange="toggleStatusFields()">
-          <option value="picked">Picked (Completed)</option>
+        <label class="form-label">New Status *</label>
+        <select class="form-control" id="newStatus">
+          <option value="picked">Picked (completed)</option>
           <option value="missed">Missed</option>
-          <option value="in_progress">In Progress</option>
+          <option value="rescheduled">Reschedule for later</option>
+          <option value="blocked_access">Blocked access</option>
         </select>
       </div>
       <div id="missedFields" style="display:none">
         <div class="form-group">
-          <label class="form-label">Reason for Missing</label>
+          <label class="form-label">Reason for missing</label>
           <select class="form-control" id="missedReason">
-            <option value="not_home">Customer not home</option>
-            <option value="bin_not_out">Bin not placed outside</option>
-            <option value="access_denied">Access denied</option>
-            <option value="vehicle_breakdown">Vehicle breakdown</option>
+            <!-- Values must match Collection.missedReason enum in the model -->
+            <option value="customer_not_home">Customer not home</option>
+            <option value="no_bin_out">Bin not placed outside</option>
+            <option value="blocked_access">Access blocked</option>
+            <option value="road_issue">Road / route issue</option>
+            <option value="truck_breakdown">Truck breakdown</option>
             <option value="other">Other</option>
           </select>
         </div>
+      </div>
+      <div id="rescheduleFields" style="display:none">
         <div class="form-group">
-          <label class="form-label">Reschedule Date (Optional)</label>
+          <label class="form-label">Reschedule to *</label>
           <input type="date" class="form-control" id="rescheduleDate" />
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Evidence Photo (Optional)</label>
+        <label class="form-label">Evidence photo (optional)</label>
         <input type="file" class="form-control" id="evidencePhoto" accept="image/*" capture="environment" />
+        <small style="color:#64748b">Recommended for "picked" so the customer has proof.</small>
       </div>
       <div class="form-group">
-        <label class="form-label">Notes (Optional)</label>
-        <textarea class="form-control" id="statusNotes" rows="2" placeholder="Any additional notes..."></textarea>
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-control" id="statusNotes" rows="2" placeholder="Any additional notes…"></textarea>
       </div>
+      <div id="statusError" style="display:none;background:#fef2f2;color:#dc2626;padding:0.65rem;border-radius:8px;font-size:0.85rem"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('statusModal')">Cancel</button>
-      <button class="btn btn-primary" id="updateBtn" onclick="updateStatus()">
-        <i class="fas fa-check"></i> Update Status
-      </button>
+      <button class="btn btn-primary" id="updateBtn"><i class="fas fa-check"></i> Update Status</button>
     </div>
   </div>
 </div>
 
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=7"></script>
+<script src="/js/api.js?v=8"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
+  window.addEventListener('error', (e) => console.error('[collections]', e.message, e.error));
+  window.addEventListener('unhandledrejection', (e) => console.error('[collections] unhandled rejection:', e.reason));
+
+  if (typeof requireAuth !== 'function') {
+    document.getElementById('totalCount').textContent =
+      'Page assets failed to load. Hard-refresh (Ctrl+Shift+R).';
+    throw new Error('Core scripts not loaded');
+  }
+
   const user = requireAuth(['driver']);
-  if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
+  if (!user) throw new Error('Not authenticated');
   initSidebar(); initTheme(); populateSidebarUser(user);
 
-  document.getElementById('dateFilter').valueAsDate = new Date();
-  let activeCollectionId = null;
+  // ── State ──────────────────────────────────────────────────────────
+  const todayISO = () => {
+    const d = new Date();
+    const tz = d.getTimezoneOffset() * 60000;
+    return new Date(d - tz).toISOString().slice(0, 10);
+  };
 
-  const loadCollections = async (page = 1) => {
+  // Defaults per the user's choice: today's date, all statuses, pending first
+  // (the API sorts {status:1, scheduledDate:1} so 'missed'/'picked' fall after
+  // 'scheduled' alphabetically — good enough for the common case).
+  document.getElementById('dateFilter').value = todayISO();
+
+  let activeCollectionId = null;
+  let currentPage = 1;
+
+  // ── Loaders ────────────────────────────────────────────────────────
+  const buildParams = (page) => {
     const status = document.getElementById('statusFilter').value;
     const date = document.getElementById('dateFilter').value;
-    let params = `?page=${page}&limit=20`;
-    if (status) params += `&status=${status}`;
-    if (date) params += `&date=${date}`;
+    let p = `?page=${page}&limit=20`;
+    if (status) p += `&status=${status}`;
+    if (date) p += `&date=${date}`;
+    return p;
+  };
+
+  const summaryParams = () => {
+    const date = document.getElementById('dateFilter').value;
+    return date ? `?date=${date}` : '';
+  };
+
+  const renderChips = (counts, total) => {
+    const active = document.getElementById('statusFilter').value;
+    const chip = (key, label, cls, count) => `
+      <div class="chip c-${cls} ${active === key ? 'active' : ''}" data-status="${key}">
+        <span class="dot"></span>
+        <span>${label}</span>
+        <span class="count">${count}</span>
+      </div>`;
+    document.getElementById('summaryChips').innerHTML = [
+      chip('',               'All',         'all',     total),
+      chip('scheduled',      'Scheduled',   'sched',   counts.scheduled),
+      chip('picked',         'Picked',      'picked',  counts.picked),
+      chip('missed',         'Missed',      'missed',  counts.missed),
+      counts.rescheduled    ? chip('rescheduled',    'Rescheduled',    'resch',   counts.rescheduled)    : '',
+      counts.blocked_access ? chip('blocked_access', 'Blocked access', 'blocked', counts.blocked_access) : '',
+    ].join('');
+
+    document.querySelectorAll('#summaryChips .chip').forEach((el) => {
+      el.addEventListener('click', () => {
+        const s = el.dataset.status;
+        document.getElementById('statusFilter').value = s;
+        loadAll(1);
+      });
+    });
+  };
+
+  // Friendly empty-state copy — explains *why* there's nothing to show so the
+  // driver doesn't think the app failed to load.
+  const emptyMessage = () => {
+    const status = document.getElementById('statusFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    if (status && date) return `No <strong>${status.replace('_', ' ')}</strong> collections for ${formatDate(date)}.`;
+    if (status)         return `No <strong>${status.replace('_', ' ')}</strong> collections found.`;
+    if (date)           return `Nothing scheduled for ${formatDate(date)} — try <em>Any date</em>.`;
+    return 'No collections assigned to you yet.';
+  };
+
+  // Render one card, shaped to the row's status so the driver immediately sees
+  // *why* a row is in its current state (collectedAt, missed reason, reschedule
+  // target, etc.) instead of just an opaque badge.
+  const renderCard = (c) => {
+    const customer = c.customer;
+    const name = customer?.user?.fullName || 'Unknown';
+    const phone = customer?.user?.phone || '';
+    const addr = customer?.residentialAddress || customer?.address || '';
+
+    let detail = '';
+    if (c.status === 'picked' && c.collectedAt) {
+      detail = `<div class="status-detail picked"><i class="fas fa-check-circle"></i>
+        <strong>Picked</strong> on ${formatDateTime(c.collectedAt)}</div>`;
+    } else if (c.status === 'missed') {
+      const r = (c.missedReason || 'unknown').replace(/_/g, ' ');
+      detail = `<div class="status-detail missed"><i class="fas fa-exclamation-triangle"></i>
+        <strong>Missed</strong> — ${r}${c.rescheduleDate ? ` · rescheduled to ${formatDate(c.rescheduleDate)}` : ''}</div>`;
+    } else if (c.status === 'rescheduled' && c.rescheduleDate) {
+      detail = `<div class="status-detail resched"><i class="fas fa-calendar-alt"></i>
+        <strong>Rescheduled</strong> to ${formatDate(c.rescheduleDate)}</div>`;
+    } else if (c.status === 'blocked_access') {
+      detail = `<div class="status-detail blocked"><i class="fas fa-ban"></i>
+        <strong>Access blocked</strong> — needs follow-up</div>`;
+    }
+
+    // "Update" is gated on the row not already being terminal-final. Picked rows
+    // can still be re-marked (mistakes happen) but we hint by changing the label.
+    const updateLabel = c.status === 'picked'
+      ? '<i class="fas fa-rotate-left"></i> Change'
+      : '<i class="fas fa-edit"></i> Update';
+
+    const dataName = name.replace(/'/g, "\\'");
+    return `
+      <div class="collection-card status-${c.status}">
+        <div style="display:flex;justify-content:space-between;gap:0.5rem;margin-bottom:0.4rem">
+          <div style="font-weight:700;font-size:0.95rem;line-height:1.2">${name}</div>
+          ${statusBadge(c.status)}
+        </div>
+        ${addr ? `<div class="meta-line"><i class="fas fa-map-marker-alt" style="color:#16a34a"></i> ${addr}</div>` : ''}
+        ${phone ? `<div class="meta-line"><i class="fas fa-phone" style="color:#3b82f6"></i> ${phone}</div>` : ''}
+        <div class="meta-line" style="color:#94a3b8"><i class="fas fa-calendar"></i> Scheduled ${formatDate(c.scheduledDate)}</div>
+        ${detail}
+        <div class="card-actions">
+          <button class="btn btn-sm btn-primary" data-id="${c._id}" data-name="${dataName}" data-current="${c.status}">${updateLabel}</button>
+          ${phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline" title="Call"><i class="fas fa-phone"></i></a>` : ''}
+          ${c.evidencePhoto ? `<a href="${c.evidencePhoto}" target="_blank" rel="noopener" class="btn btn-sm btn-outline" title="Evidence photo"><i class="fas fa-image"></i></a>` : ''}
+        </div>
+      </div>
+    `;
+  };
+
+  const loadAll = async (page = 1) => {
+    currentPage = page;
+    // Optimistic UI: re-render chips with active state immediately so the click
+    // feels responsive even before the fetches resolve.
+    const grid = document.getElementById('collectionsGrid');
+    grid.innerHTML = '<div class="skeleton" style="height:170px;border-radius:12px"></div>'.repeat(3);
 
     try {
-      const res = await api.getDriverCollections(params);
-      const { data, pagination } = res;
-      document.getElementById('totalCount').textContent = `${pagination.total} collections`;
+      const [listRes, summaryRes] = await Promise.all([
+        api.getDriverCollections(buildParams(page)),
+        api.getDriverCollectionsSummary(summaryParams()),
+      ]);
 
-      const grid = document.getElementById('collectionsGrid');
+      const { data, pagination } = listRes;
+      const { counts, total } = summaryRes.data;
+
+      renderChips(counts, total);
+      document.getElementById('totalCount').textContent =
+        `${pagination.total} of ${total} collection${total === 1 ? '' : 's'} shown`;
+
       if (!data?.length) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon"><i class="fas fa-truck"></i></div><div class="empty-title">No collections found</div></div>`;
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon"><i class="fas fa-truck"></i></div>
+          <div class="empty-title">No collections found</div>
+          <div class="empty-subtitle">${emptyMessage()}</div>
+        </div>`;
         document.getElementById('paginationContainer').innerHTML = '';
         return;
       }
 
-      grid.innerHTML = data.map((c) => {
-        const customer = c.customer;
-        const name = customer?.user?.fullName || 'Unknown';
-        const phone = customer?.user?.phone || '';
-        const addr = customer?.residentialAddress || '';
-        const canUpdate = c.status !== 'picked';
-        return `
-          <div class="collection-card status-${c.status}">
-            <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
-              <div style="font-weight:600;font-size:0.9rem">${name}</div>
-              ${statusBadge(c.status)}
-            </div>
-            <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.25rem"><i class="fas fa-map-marker-alt" style="color:#16a34a;margin-right:0.3rem"></i>${addr || 'No address'}</div>
-            <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem"><i class="fas fa-phone" style="color:#3b82f6;margin-right:0.3rem"></i>${phone || '&mdash;'}</div>
-            <div style="font-size:0.75rem;color:#94a3b8;margin-bottom:0.75rem">Scheduled: ${formatDate(c.scheduledDate)}</div>
-            <div style="display:flex;gap:0.4rem">
-              ${canUpdate ? `<button class="btn btn-sm btn-primary" onclick="openStatusModal('${c._id}','${name}')"><i class="fas fa-edit"></i> Update</button>` : ''}
-              ${phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline"><i class="fas fa-phone"></i></a>` : ''}
-              ${c.evidencePhoto ? `<a href="${c.evidencePhoto}" target="_blank" class="btn btn-sm btn-outline"><i class="fas fa-image"></i></a>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
+      grid.innerHTML = data.map(renderCard).join('');
+
+      // Wire up per-card Update buttons after re-rendering (event delegation
+      // would also work, but explicit bindings make the data attrs obvious).
+      grid.querySelectorAll('.card-actions button[data-id]').forEach((btn) => {
+        btn.addEventListener('click', () =>
+          openStatusModal(btn.dataset.id, btn.dataset.name, btn.dataset.current));
+      });
 
       const pc = document.getElementById('paginationContainer');
       pc.innerHTML = '';
-      if (pagination.pages > 1) pc.appendChild(renderPagination(pagination, loadCollections));
+      if (pagination.pages > 1) pc.appendChild(renderPagination(pagination, loadAll));
     } catch (err) {
+      console.error('[collections] loadAll failed:', err);
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;color:#dc2626">
+        <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="empty-title">Failed to load collections</div>
+        <div class="empty-subtitle">${err.message || 'Request failed'}</div>
+      </div>`;
       Toast.error('Error', err.message);
     }
   };
 
-  const openStatusModal = (id, name) => {
+  // ── Update modal ───────────────────────────────────────────────────
+  const toggleStatusFields = () => {
+    const v = document.getElementById('newStatus').value;
+    document.getElementById('missedFields').style.display     = (v === 'missed' || v === 'blocked_access') ? 'block' : 'none';
+    document.getElementById('rescheduleFields').style.display = (v === 'rescheduled') ? 'block' : 'none';
+    // When the driver picks "blocked_access", pre-select the matching reason so
+    // saving works even if they don't open the reason dropdown.
+    if (v === 'blocked_access') document.getElementById('missedReason').value = 'blocked_access';
+  };
+
+  const openStatusModal = (id, name, currentStatus) => {
     activeCollectionId = id;
-    document.getElementById('modalCustomerName').textContent = name;
+    document.getElementById('modalCustomerName').textContent = `Update — ${name}`;
+    // Default the modal to the *next* sensible action: if the row is already
+    // missed/rescheduled, the driver probably wants to flip to picked.
     document.getElementById('newStatus').value = 'picked';
     document.getElementById('statusNotes').value = '';
     document.getElementById('evidencePhoto').value = '';
+    document.getElementById('rescheduleDate').value = '';
+    document.getElementById('statusError').style.display = 'none';
     toggleStatusFields();
     document.getElementById('statusModal').classList.add('open');
   };
 
-  const toggleStatusFields = () => {
-    const missed = document.getElementById('newStatus').value === 'missed';
-    document.getElementById('missedFields').style.display = missed ? 'block' : 'none';
-  };
-
   const updateStatus = async () => {
     if (!activeCollectionId) return;
+    const errorEl = document.getElementById('statusError');
+    errorEl.style.display = 'none';
+
     const status = document.getElementById('newStatus').value;
     const notes = document.getElementById('statusNotes').value.trim();
     const missedReason = document.getElementById('missedReason').value;
     const rescheduleDate = document.getElementById('rescheduleDate').value;
     const photoFile = document.getElementById('evidencePhoto').files[0];
 
+    if (status === 'rescheduled' && !rescheduleDate) {
+      errorEl.textContent = 'Please pick a reschedule date.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
     const btn = document.getElementById('updateBtn');
-    setButtonLoading(btn, true, 'Updating...');
+    setButtonLoading(btn, true, 'Updating…');
 
     try {
       const formData = new FormData();
       formData.append('status', status);
       if (notes) formData.append('notes', notes);
-      if (status === 'missed') {
+      if (status === 'missed' || status === 'blocked_access') {
         formData.append('missedReason', missedReason);
-        if (rescheduleDate) formData.append('rescheduleDate', rescheduleDate);
       }
+      if (status === 'rescheduled') formData.append('rescheduleDate', rescheduleDate);
       if (photoFile) formData.append('evidencePhoto', photoFile);
 
+      // Best-effort geo tag — don't block the save if the user denies the prompt.
       if (navigator.geolocation) {
         await new Promise((resolve) => {
-          navigator.geolocation.getCurrentPosition((pos) => {
-            formData.append('latitude', pos.coords.latitude);
-            formData.append('longitude', pos.coords.longitude);
-            resolve();
-          }, resolve, { timeout: 3000 });
+          navigator.geolocation.getCurrentPosition(
+            (pos) => { formData.append('latitude', pos.coords.latitude); formData.append('longitude', pos.coords.longitude); resolve(); },
+            () => resolve(),
+            { timeout: 3000 }
+          );
         });
       }
 
       await api.updateCollectionStatus(activeCollectionId, formData);
-      Toast.success('Updated', `Collection marked as ${status}`);
+      Toast.success('Updated', `Collection marked as ${status.replace('_', ' ')}`);
       closeModal('statusModal');
-      loadCollections(1);
+      loadAll(currentPage);
     } catch (err) {
-      Toast.error('Error', err.message);
+      errorEl.textContent = err.message || 'Update failed';
+      errorEl.style.display = 'block';
     } finally {
       setButtonLoading(btn, false);
     }
   };
 
-  const clearFilters = () => {
-    document.getElementById('statusFilter').value = '';
+  // ── Bindings ───────────────────────────────────────────────────────
+  document.querySelectorAll('.modal-overlay').forEach((o) =>
+    o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('open'); }));
+
+  document.getElementById('newStatus').addEventListener('change', toggleStatusFields);
+  document.getElementById('updateBtn').addEventListener('click', updateStatus);
+  document.getElementById('statusFilter').addEventListener('change', () => loadAll(1));
+  document.getElementById('dateFilter').addEventListener('change',   () => loadAll(1));
+  document.getElementById('todayBtn').addEventListener('click', () => {
+    document.getElementById('dateFilter').value = todayISO();
+    loadAll(1);
+  });
+  document.getElementById('anyDateBtn').addEventListener('click', () => {
     document.getElementById('dateFilter').value = '';
-    loadCollections(1);
-  };
+    loadAll(1);
+  });
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFilter').value = todayISO();
+    loadAll(1);
+  });
+  document.getElementById('refreshBtn').addEventListener('click', () => loadAll(currentPage));
 
+  Object.assign(window, { loadAll, openModal: (id) => document.getElementById(id)?.classList.add('open'), closeModal: (id) => document.getElementById(id)?.classList.remove('open') });
 
-  document.querySelectorAll('.modal-overlay').forEach((o) => o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('open'); }));
-
-  loadCollections(1);
+  loadAll(1);
 </script>
 </body>
 </html>

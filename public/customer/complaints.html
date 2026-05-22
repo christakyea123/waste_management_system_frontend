@@ -62,9 +62,10 @@
               <label class="form-label">Category *</label>
               <select class="form-control" id="category">
                 <option value="missed_collection">Missed Collection</option>
-                <option value="driver_behavior">Driver Behavior</option>
+                <option value="driver_conduct">Driver Conduct</option>
                 <option value="billing_issue">Billing Issue</option>
                 <option value="service_quality">Service Quality</option>
+                <option value="general_inquiry">General Inquiry</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -105,6 +106,25 @@
   if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
   initSidebar(); initTheme(); populateSidebarUser(user);
 
+  // If the user came from the landing-page "Contact Us" gate, restore whatever
+  // they had typed into the modal so they don't lose their message after the
+  // login round-trip. We clear the slot after restore — refresh shouldn't keep
+  // forcing it back into the form.
+  (() => {
+    try {
+      const pendingRaw = sessionStorage.getItem('wm_pending_contact');
+      if (!pendingRaw) return;
+      const pending = JSON.parse(pendingRaw);
+      sessionStorage.removeItem('wm_pending_contact');
+      if (pending?.message) {
+        document.getElementById('category').value = 'general_inquiry';
+        document.getElementById('subject').value = pending.subject || 'Contact from website';
+        document.getElementById('description').value = pending.message;
+        Toast.info('Restored', 'We brought back the message you started on the homepage.');
+      }
+    } catch (_) { /* corrupt sessionStorage — ignore */ }
+  })();
+
   const statusColors = { open: '#ef4444', in_review: '#eab308', resolved: '#16a34a', closed: '#64748b' };
 
   const loadComplaints = async () => {
@@ -126,7 +146,7 @@
           <div style="font-size:0.75rem;color:#94a3b8;text-transform:capitalize;margin-bottom:0.4rem">${(c.category||'').replace(/_/g,' ')}</div>
           <div style="font-size:0.8rem;color:#64748b;white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${c.description}</div>
           <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.4rem">${formatDate(c.createdAt)}</div>
-          ${c.adminResponse ? `<div style="margin-top:0.5rem;background:#f0fdf4;border-radius:6px;padding:0.5rem;font-size:0.8rem;color:#15803d"><strong>Response:</strong> ${c.adminResponse}</div>` : ''}
+          ${c.resolution ? `<div style="margin-top:0.5rem;background:#f0fdf4;border-radius:6px;padding:0.5rem;font-size:0.8rem;color:#15803d"><strong>Admin reply:</strong> ${c.resolution}</div>` : ''}
         </div>
       `).join('');
     } catch (err) {

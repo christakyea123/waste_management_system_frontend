@@ -100,6 +100,7 @@
             </select>
             <select id="categoryFilter" class="form-control" style="padding:0.5rem 0.75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit" onchange="loadComplaints()">
               <option value="">All Categories</option>
+              <option value="general_inquiry">General Inquiry (Contact Us)</option>
               <option value="missed_collection">Missed Collection</option>
               <option value="billing_issue">Billing Issue</option>
               <option value="driver_conduct">Driver Conduct</option>
@@ -198,6 +199,7 @@
     billing_issue: 'Billing Issue',
     driver_conduct: 'Driver Conduct',
     service_quality: 'Service Quality',
+    general_inquiry: 'Contact Us',
     other: 'Other',
   })[c] || c;
 
