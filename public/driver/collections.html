@@ -240,10 +240,10 @@
     return new Date(d - tz).toISOString().slice(0, 10);
   };
 
-  // Defaults per the user's choice: today's date, all statuses, pending first
-  // (the API sorts {status:1, scheduledDate:1} so 'missed'/'picked' fall after
-  // 'scheduled' alphabetically — good enough for the common case).
-  document.getElementById('dateFilter').value = todayISO();
+  // Default to "everything" — no date filter, all statuses. The driver sees
+  // their full backlog on first load. Use the "Today" button to narrow down
+  // to today's pickups. The API sorts {status:1, scheduledDate:1} so pending
+  // work shows up before completed/missed rows within each status group.
 
   let activeCollectionId = null;
   let currentPage = 1;
@@ -284,6 +284,9 @@
       el.addEventListener('click', () => {
         const s = el.dataset.status;
         document.getElementById('statusFilter').value = s;
+        // Clicking "All" should show every collection regardless of date —
+        // clear the date filter so the driver isn't silently scoped to today.
+        if (s === '') document.getElementById('dateFilter').value = '';
         loadAll(1);
       });
     });
@@ -499,7 +502,7 @@
   });
   document.getElementById('clearBtn').addEventListener('click', () => {
     document.getElementById('statusFilter').value = '';
-    document.getElementById('dateFilter').value = todayISO();
+    document.getElementById('dateFilter').value = '';
     loadAll(1);
   });
   document.getElementById('refreshBtn').addEventListener('click', () => loadAll(currentPage));

@@ -1,0 +1,115 @@
+/* Shared layout for Privacy Policy + Terms of Service pages.
+   Kept separate from landing.css so legal pages can evolve without
+   risking the marketing site's visual stability. */
+
+.legal-hero {
+  padding: 5.5rem 0 3rem;
+  background: linear-gradient(135deg, #052e16 0%, #166534 60%, #16a34a 100%);
+  color: #fff;
+  text-align: center;
+}
+.legal-hero .section-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.legal-hero h1 {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 1rem 0 0.5rem;
+}
+.legal-hero p {
+  opacity: 0.9;
+  font-size: 1rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.legal-body {
+  padding: 3rem 0 5rem;
+  background: #f8fafc;
+}
+.legal-wrap {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 2.5rem clamp(1.25rem, 3vw, 3rem);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.legal-wrap .toc {
+  background: #f8fafc;
+  border-left: 4px solid #16a34a;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  font-size: 0.92rem;
+}
+.legal-wrap .toc strong {
+  display: block;
+  color: #0f172a;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.legal-wrap .toc ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  columns: 2;
+  column-gap: 1.5rem;
+}
+.legal-wrap .toc li { margin: 0.2rem 0; }
+.legal-wrap .toc a {
+  color: #15803d;
+  text-decoration: none;
+}
+.legal-wrap .toc a:hover { text-decoration: underline; }
+
+.legal-wrap h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 2.5rem 0 0.75rem;
+  scroll-margin-top: 90px;
+}
+.legal-wrap h2:first-of-type { margin-top: 0.5rem; }
+.legal-wrap h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 1.5rem 0 0.5rem;
+}
+.legal-wrap p,
+.legal-wrap li {
+  color: #475569;
+  line-height: 1.75;
+  font-size: 1rem;
+}
+.legal-wrap p { margin: 0 0 1rem; }
+.legal-wrap ul,
+.legal-wrap ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+.legal-wrap li { margin: 0.4rem 0; }
+.legal-wrap strong { color: #0f172a; }
+.legal-wrap a { color: #15803d; }
+
+.legal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.legal-meta span strong { color: #0f172a; }
+
+@media (max-width: 640px) {
+  .legal-wrap .toc ol { columns: 1; }
+}

@@ -151,6 +151,35 @@
         </div>
       </div>
 
+      <!-- Customers with outstanding balances -->
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <span class="card-title">Customers Owing</span>
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span id="outstandingTotal" style="font-size:0.85rem;color:#64748b">Loading...</span>
+            <a href="/admin/invoices.html" class="btn btn-sm btn-outline">All Invoices</a>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th class="hide-sm">Phone</th>
+                <th class="hide-md">Invoices</th>
+                <th class="hide-md">Oldest Due</th>
+                <th style="text-align:right">Outstanding</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="outstandingTable">
+              <tr><td colspan="7"><div class="skeleton" style="height:40px;margin:0.5rem 1rem"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Data Tables Row -->
       <div class="grid-2" style="margin-top:1.5rem;gap:1.5rem">
         <!-- Recent Registrations -->
@@ -217,7 +246,7 @@
 <!-- Toast container will be injected by utils.js -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=7"></script>
+<script src="/js/api.js?v=8"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   // Auth guard
@@ -407,6 +436,55 @@
     }
   };
 
+  const loadOutstanding = async () => {
+    const tbody = document.getElementById('outstandingTable');
+    const totalEl = document.getElementById('outstandingTotal');
+    try {
+      const { data } = await api.getOutstanding('?limit=50');
+      const rows = data.customers || [];
+      totalEl.textContent = rows.length
+        ? `${data.customerCount} customer${data.customerCount === 1 ? '' : 's'} • ${formatCurrency(data.totalOutstanding)} owed`
+        : 'No outstanding balances';
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="fas fa-check-circle"></i></div><div class="empty-title">All caught up — no customers owing</div></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map((r) => {
+        const overdue = r.hasOverdue === 1;
+        return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.6rem">
+                ${r.profileImage
+                  ? `<img src="${r.profileImage}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" />`
+                  : `<div class="avatar avatar-sm">${getInitials(r.fullName)}</div>`
+                }
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">${r.fullName || 'N/A'}</div>
+                  <div style="font-size:0.72rem;color:#64748b">${r.customerNumber || ''} • ${(r.binType || 'basic').toUpperCase()}</div>
+                </div>
+              </div>
+            </td>
+            <td class="hide-sm">${r.phone || 'N/A'}</td>
+            <td class="hide-md"><span class="badge badge-secondary">${r.invoiceCount}</span></td>
+            <td class="hide-md">${formatDate(r.oldestDueDate)}</td>
+            <td style="text-align:right;font-weight:700;color:${overdue ? '#ef4444' : '#0f172a'}">${formatCurrency(r.outstanding)}</td>
+            <td>${overdue ? '<span class="badge badge-danger">overdue</span>' : '<span class="badge badge-warning">pending</span>'}</td>
+            <td>
+              <a class="btn btn-sm btn-outline" href="/admin/invoices.html?customer=${r.customerId}" title="View invoices"><i class="fas fa-eye"></i></a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      totalEl.textContent = 'Failed to load';
+      tbody.innerHTML = `<tr><td colspan="7" class="text-muted text-sm" style="padding:1rem;text-align:center">Failed to load outstanding balances</td></tr>`;
+      console.error('Outstanding error:', err);
+    }
+  };
+
   const loadCustomerMap = async () => {
     try {
       const { data } = await api.getCustomers('?limit=100');
@@ -447,12 +525,14 @@
   document.getElementById('refreshBtn').addEventListener('click', () => {
     loadStats();
     loadCollectionsChart();
+    loadOutstanding();
   });
 
   // Init
   loadStats();
   loadRevenueChart(new Date().getFullYear());
   loadCollectionsChart();
+  loadOutstanding();
   loadCustomerMap();
 </script>
 </body>

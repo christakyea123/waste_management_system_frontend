@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="About 035 F Arkoh Waste Management — Ghana's trusted waste collection partner. Learn our story, mission, and the team keeping communities clean." />
+  <title>About Us | 035 F Arkoh Waste Management</title>
+  <link rel="icon" type="image/png" href="/logo/Arkoh logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/landing.css?v=7" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
+  <style>
+    /* Local layout tweaks — keep the page consistent with the landing site
+       without bloating the shared stylesheet. */
+    .about-hero {
+      padding: 6rem 0 4rem;
+      background: linear-gradient(135deg, #052e16 0%, #166534 60%, #16a34a 100%);
+      color: #fff;
+      text-align: center;
+    }
+    .about-hero h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .about-hero p {
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      opacity: 0.92;
+    }
+    .about-section { padding: 4rem 0; }
+    .about-section.alt { background: #f8fafc; }
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .about-card {
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.2s;
+    }
+    .about-card:hover {
+      border-color: #16a34a;
+      box-shadow: 0 8px 24px rgba(22,163,74,0.08);
+      transform: translateY(-3px);
+    }
+    .about-card .icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: #dcfce7;
+      color: #15803d;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.25rem;
+    }
+    .about-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    .about-card p {
+      color: #64748b;
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .story-grid .story-text h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 1.25rem; }
+    .story-grid .story-text p { color: #475569; line-height: 1.8; margin-bottom: 1rem; font-size: 1.02rem; }
+    .story-visual {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      border-radius: 20px;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+      color: #15803d;
+      position: relative;
+      overflow: hidden;
+    }
+    .story-visual::before {
+      content: "";
+      position: absolute;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(22,163,74,0.18);
+      top: -60px; right: -60px;
+    }
+    .story-visual::after {
+      content: "";
+      position: absolute;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: rgba(22,163,74,0.12);
+      bottom: -40px; left: -30px;
+    }
+    .story-visual i { position: relative; z-index: 1; }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .stat-block {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      background: #fff;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+    }
+    .stat-block strong {
+      display: block;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 800;
+      color: #16a34a;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-block span { color: #64748b; font-size: 0.9rem; }
+    .values-list { list-style: none; padding: 0; margin: 1.5rem 0 0; display: grid; gap: 0.75rem; }
+    .values-list li {
+      display: flex;
+      align-items: start;
+      gap: 0.75rem;
+      color: #475569;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .values-list li i { color: #16a34a; margin-top: 0.25rem; }
+    @media (max-width: 760px) {
+      .story-grid { grid-template-columns: 1fr; }
+      .story-grid .story-visual { order: -1; max-width: 400px; margin: 0 auto; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation (same as landing page) -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="/" class="logo">
+        <img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="logo-img" />
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/#pricing">Pricing</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="/customer/login.html" class="btn btn-outline">Login</a>
+        <a href="/customer/register.html" class="btn btn-primary">Get Started</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="about-hero">
+    <div class="container">
+      <span class="section-badge" style="background:rgba(255,255,255,0.15);color:#fff">About Us</span>
+      <h1>Building a Cleaner Ghana,<br />One Pickup at a Time</h1>
+      <p>035 F Arkoh Waste Management is a Ghanaian-owned company on a mission to make professional, reliable waste collection accessible to every household and business — through technology, accountability, and people who care about the communities they serve.</p>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section class="about-section">
+    <div class="container">
+      <div class="story-grid">
+        <div class="story-text">
+          <span class="section-badge">Our Story</span>
+          <h2>From a single truck to a national platform</h2>
+          <p>We started 035 F Arkoh Waste Management because we kept seeing the same problem across our neighbourhoods: bins overflowing, missed pickups, and customers with no easy way to pay or get answers. The systems available were either too informal to depend on or too rigid to fit how Ghanaians actually live.</p>
+          <p>So we built something different — a service that combines disciplined, on-the-ground waste collection with the kind of digital tools customers expect: online registration, mobile-money payments, SMS notifications, and real visibility into every pickup.</p>
+          <p>Today, we serve households, businesses, and entire estates across Greater Accra and Ashanti, and we're growing every month. The truck fleet has grown. The team has grown. The mission hasn't.</p>
+        </div>
+        <div class="story-visual">
+          <i class="fas fa-truck-fast"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission / Vision / Values -->
+  <section class="about-section alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">What Drives Us</span>
+        <h2>Mission, Vision &amp; Values</h2>
+        <p>Three commitments that shape every route we run and every decision we make.</p>
+      </div>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-bullseye"></i></div>
+          <h3>Our Mission</h3>
+          <p>To deliver dependable, dignified waste management services to every Ghanaian community — using technology to make the experience simple, transparent, and affordable for the customer, and efficient for the operator.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-eye"></i></div>
+          <h3>Our Vision</h3>
+          <p>A Ghana where clean streets aren't a privilege — they're the standard. We see waste management as essential public infrastructure, and we're building the platform that makes that standard achievable nationwide.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-heart"></i></div>
+          <h3>Our Values</h3>
+          <ul class="values-list">
+            <li><i class="fas fa-check-circle"></i><span><strong>Reliability</strong> — if we promise a pickup, it happens.</span></li>
+            <li><i class="fas fa-check-circle"></i><span><strong>Transparency</strong> — clear pricing, clear schedules, clear receipts.</span></li>
+            <li><i class="fas fa-check-circle"></i><span><strong>Respect</strong> — for our customers, our crews, and the environment.</span></li>
+            <li><i class="fas fa-check-circle"></i><span><strong>Improvement</strong> — every route, every month, sharper than the last.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What we do -->
+  <section class="about-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">What We Do</span>
+        <h2>End-to-end waste management</h2>
+        <p>From the bin at your gate to the disposal site — we own the entire journey so you don't have to think about it.</p>
+      </div>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-home"></i></div>
+          <h3>Residential Pickup</h3>
+          <p>Scheduled weekly or bi-weekly doorstep collection for homes, with SMS notifications before every pickup and digital receipts after.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-building"></i></div>
+          <h3>Commercial &amp; Estate</h3>
+          <p>Custom schedules and bin sizes for offices, restaurants, shops, and gated communities — with a dedicated account contact.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-recycle"></i></div>
+          <h3>Recycling Program</h3>
+          <p>Sorted recycling collection to help households and businesses divert plastic, paper, and metal from landfill.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon"><i class="fas fa-leaf"></i></div>
+          <h3>Organic Waste</h3>
+          <p>Specialised pickup for garden and food waste, routed to composting partners instead of general disposal.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="about-section alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Our Impact</span>
+        <h2>Numbers that matter</h2>
+        <p>Every pickup is a small win for a cleaner community. Here's what we've added up so far.</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-block">
+          <strong>5,000+</strong>
+          <span>Households served</span>
+        </div>
+        <div class="stat-block">
+          <strong>98%</strong>
+          <span>Collection success rate</span>
+        </div>
+        <div class="stat-block">
+          <strong>50+</strong>
+          <span>Zones covered</span>
+        </div>
+        <div class="stat-block">
+          <strong>24/7</strong>
+          <span>Customer support</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Join a cleaner community today</h2>
+        <p>Registration is free. Pickup starts within 24 hours of approval.</p>
+        <div class="cta-actions">
+          <a href="/customer/register.html" class="btn btn-white btn-lg">
+            <i class="fas fa-user-plus"></i> Register Free Today
+          </a>
+          <a href="/#contact" class="btn btn-ghost-white btn-lg">
+            <i class="fas fa-envelope"></i> Get in Touch
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo">
+            <img src="/logo/Arkoh logo.png" alt="035 F Arkoh Waste Management" class="logo-img" />
+          </a>
+          <p>Ghana's leading waste management platform. Making communities cleaner, one pickup at a time.</p>
+          <div class="social-links">
+            <a href="#" id="whatsappLink" aria-label="WhatsApp" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="/#services">Residential Collection</a></li>
+            <li><a href="/#services">Commercial Services</a></li>
+            <li><a href="/#services">Recycling Program</a></li>
+            <li><a href="/#services">Organic Waste</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about.html">About Us</a></li>
+            <li><a href="/#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Portals</h4>
+          <ul>
+            <li><a href="/customer/login.html">Customer Login</a></li>
+            <li><a href="/customer/register.html">Register</a></li>
+            <li><a href="/driver/login.html">Driver Portal</a></li>
+            <li><a href="/admin/index.html">Admin Panel</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 035 F Arkoh Waste Management. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="/privacy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/landing.js?v=3"></script>
+  <script src="/js/whatsapp.js?v=1"></script>
+</body>
+</html>

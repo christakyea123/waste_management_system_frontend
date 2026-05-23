@@ -135,6 +135,10 @@
   if (!user) throw new Error("Not authenticated"); // requireAuth already redirected
   initSidebar(); initTheme(); populateSidebarUser(user);
 
+  // Read ?customer=... from the URL so links from the admin dashboard
+  // ("Customers Owing") can deep-link straight to one customer's invoices.
+  const customerFilter = new URLSearchParams(window.location.search).get('customer');
+
   const loadInvoices = async (page = 1) => {
     const status = document.getElementById('statusFilter').value;
     const month = document.getElementById('monthFilter').value;
@@ -143,6 +147,7 @@
     if (status) params += `&status=${status}`;
     if (month) params += `&month=${month}`;
     if (year) params += `&year=${year}`;
+    if (customerFilter) params += `&customer=${encodeURIComponent(customerFilter)}`;
 
     try {
       const res = await api.getAdminInvoices(params);

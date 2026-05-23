@@ -197,6 +197,11 @@
   let currentPage = 1;
   let selectedCustomerId = null;
   let allDrivers = [];
+  // Live pricing — populated once on page load from the same settings the
+  // pricing page edits. We render these values in the edit-customer Bin Type
+  // dropdown so the label always matches what new invoices will actually charge.
+  // Fallback values kick in only if the request fails.
+  let livePricing = { basic: 50, standard: 80, premium: 120 };
 
   const loadAllDrivers = async () => {
     try {
@@ -204,6 +209,15 @@
       allDrivers = res.data || [];
     } catch(e) {}
   };
+
+  const loadLivePricing = async () => {
+    try {
+      const { data } = await api.getPricing();
+      if (data?.pricing) livePricing = { ...livePricing, ...data.pricing };
+    } catch (_) { /* keep fallback */ }
+  };
+
+  const fmtPrice = (n) => Number.isFinite(n) ? `GHS ${Number.isInteger(n) ? n : n.toFixed(2)}` : '—';
 
   const loadCustomers = async (page = 1) => {
     currentPage = page;
@@ -307,9 +321,9 @@
           <div class="form-group">
             <label class="form-label">Bin Type</label>
             <select class="form-control" id="editBinType">
-              <option value="basic" ${customer.binType === 'basic' ? 'selected' : ''}>Basic (GHS 50)</option>
-              <option value="standard" ${customer.binType === 'standard' ? 'selected' : ''}>Standard (GHS 80)</option>
-              <option value="premium" ${customer.binType === 'premium' ? 'selected' : ''}>Premium (GHS 120)</option>
+              <option value="basic" ${customer.binType === 'basic' ? 'selected' : ''}>Basic (${fmtPrice(livePricing.basic)})</option>
+              <option value="standard" ${customer.binType === 'standard' ? 'selected' : ''}>Standard (${fmtPrice(livePricing.standard)})</option>
+              <option value="premium" ${customer.binType === 'premium' ? 'selected' : ''}>Premium (${fmtPrice(livePricing.premium)})</option>
             </select>
           </div>
           <div class="form-group">
@@ -471,6 +485,7 @@
   });
 
   loadAllDrivers();
+  loadLivePricing();
   loadCustomers(1);
 </script>
 </body>

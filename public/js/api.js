@@ -82,6 +82,7 @@ class ApiClient {
 
   // Admin
   getDashboard()                          { return this.get('/admin/dashboard'); }
+  getOutstanding(params = '')             { return this.get(`/admin/outstanding${params}`); }
   getCustomers(params = '')               { return this.get(`/admin/customers${params}`); }
   getCustomer(id)                         { return this.get(`/admin/customers/${id}`); }
   updateCustomer(id, data)                { return this.put(`/admin/customers/${id}`, data); }
