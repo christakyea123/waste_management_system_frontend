@@ -7,14 +7,21 @@ window.addEventListener('scroll', () => {
   document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 400);
 }, { passive: true });
 
-// Mobile menu
+// Mobile menu — keep the hamburger button in sync with the menu so the bars
+// morph into an X when open (visual cue: "tap again to close") and screen
+// readers get the right aria-expanded state.
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
-hamburger.addEventListener('click', () => {
-  navLinks.classList.toggle('open');
-});
+const setMenu = (open) => {
+  navLinks.classList.toggle('open', open);
+  hamburger.classList.toggle('open', open);
+  hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  hamburger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+};
+setMenu(false);
+hamburger.addEventListener('click', () => setMenu(!navLinks.classList.contains('open')));
 navLinks.querySelectorAll('a').forEach((link) => {
-  link.addEventListener('click', () => navLinks.classList.remove('open'));
+  link.addEventListener('click', () => setMenu(false));
 });
 
 // FAQ accordion

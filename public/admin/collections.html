@@ -62,9 +62,16 @@
 
     <div class="page-content">
       <div class="page-header">
-        <div><h1>Collections</h1><p id="totalCount">Loading...</p></div>
-        <button class="btn btn-primary" onclick="openBulkModal()">
-          <i class="fas fa-calendar-plus"></i> Schedule Bulk
+        <div>
+          <h1>Collections</h1>
+          <p id="totalCount">Loading...</p>
+          <p style="font-size:0.78rem;color:#16a34a;margin-top:0.25rem">
+            <i class="fas fa-bolt"></i>
+            Pickups are auto-scheduled from each customer's plan — no manual entry needed.
+          </p>
+        </div>
+        <button class="btn btn-outline" onclick="rerunAutoSchedule()" id="rerunBtn">
+          <i class="fas fa-sync-alt"></i> Re-sync Schedule
         </button>
       </div>
 
@@ -119,41 +126,9 @@
   </main>
 </div>
 
-<!-- Bulk Schedule Modal -->
-<div class="modal-overlay" id="bulkModal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Schedule Bulk Collections</span>
-      <button class="modal-close" onclick="closeModal('bulkModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Driver *</label>
-        <select class="form-control" id="bulkDriver"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Date *</label>
-        <input type="date" class="form-control" id="bulkDate" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Zone (Optional)</label>
-        <input type="text" class="form-control" id="bulkZone" placeholder="Leave blank for all assigned customers" />
-      </div>
-      <div style="background:#f0f9ff;border-radius:8px;padding:0.75rem;font-size:0.85rem;color:#0369a1">
-        <i class="fas fa-info-circle"></i> Schedules collections for all active customers assigned to this driver. Already-scheduled customers for that date are skipped.
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('bulkModal')">Cancel</button>
-      <button class="btn btn-primary" id="bulkBtn" onclick="scheduleBulk()">
-        <i class="fas fa-calendar-plus"></i> Schedule
-      </button>
-    </div>
-  </div>
-</div>
 
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=7"></script>
+<script src="/js/api.js?v=9"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   const user = requireAuth(['admin', 'superadmin']);
@@ -169,7 +144,6 @@
       const drivers = res.data || [];
       const html = drivers.map((d) => `<option value="${d._id}">${d.user?.fullName || d.driverId}</option>`).join('');
       document.getElementById('driverFilter').innerHTML = `<option value="">All Drivers</option>${html}`;
-      document.getElementById('bulkDriver').innerHTML = `<option value="">Select Driver</option>${html}`;
     } catch (_) {}
   };
 
@@ -226,26 +200,15 @@
     }
   };
 
-  const openBulkModal = () => {
-    document.getElementById('bulkDate').valueAsDate = new Date();
-    document.getElementById('bulkModal').classList.add('open');
-  };
-
-  const scheduleBulk = async () => {
-    const driverId = document.getElementById('bulkDriver').value;
-    const scheduledDate = document.getElementById('bulkDate').value;
-    const zone = document.getElementById('bulkZone').value.trim();
-
-    if (!driverId) return Toast.warning('Required', 'Please select a driver');
-    if (!scheduledDate) return Toast.warning('Required', 'Please select a date');
-
-    const btn = document.getElementById('bulkBtn');
-    setButtonLoading(btn, true, 'Scheduling...');
-
+  // The auto-scheduler runs at startup + daily, but admins occasionally want
+  // to force a re-sync (e.g. after reassigning many drivers in one sitting).
+  // This hits POST /admin/auto-schedule/run and refreshes the table afterward.
+  const rerunAutoSchedule = async () => {
+    const btn = document.getElementById('rerunBtn');
+    setButtonLoading(btn, true, 'Syncing...');
     try {
-      const { data } = await api.bulkScheduleCollections({ driverId, scheduledDate, zone: zone || undefined });
-      Toast.success('Done', `${data.count} collections scheduled${data.skipped ? `, ${data.skipped} already existed` : ''}`);
-      closeModal('bulkModal');
+      const { data, message } = await api.runAutoSchedule();
+      Toast.success('Done', message || `${data.created} new pickups scheduled`);
       loadCollections(1);
     } catch (err) {
       Toast.error('Error', err.message);

@@ -132,7 +132,7 @@
 </div>
 
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=7"></script>
+<script src="/js/api.js?v=9"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   const user = requireAuth(['customer']);
@@ -166,7 +166,7 @@
           <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Email:</span><strong>${u.email}</strong></div>
           <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Phone:</span><strong>${u.phone}</strong></div>
           <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Bin Type:</span><strong style="text-transform:capitalize">${customer.binType}</strong></div>
-          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Schedule:</span><strong style="text-transform:capitalize">${customer.collectionSchedule?.day || 'N/A'} (${customer.collectionSchedule?.frequency || 'weekly'})</strong></div>
+          <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Schedule:</span><strong style="text-transform:capitalize">${customer.collectionSchedule?.day || 'N/A'} (${(customer.collectionSchedule?.frequency || 'biweekly').replace('_', '-')})</strong></div>
           <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Monthly:</span><strong>${formatCurrency(customer.monthlyFee)}</strong></div>
           <div style="display:flex;gap:0.5rem"><span style="color:#64748b;min-width:80px">Member:</span><strong>${formatDate(customer.registrationDate)}</strong></div>
         </div>

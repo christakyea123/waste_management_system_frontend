@@ -46,7 +46,10 @@
 
     /* ── Collection cards ──────────────────────────────────────────── */
     .collections-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      display: grid;
+      /* min(100%, 310px) lets the cards shrink below 310px on narrow phones
+         instead of overflowing the container horizontally. */
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 310px), 1fr));
       gap: 1rem;
     }
     .collection-card {
@@ -217,7 +220,7 @@
 </div>
 
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=8"></script>
+<script src="/js/api.js?v=9"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   window.addEventListener('error', (e) => console.error('[collections]', e.message, e.error));

@@ -180,6 +180,29 @@
         </div>
       </div>
 
+      <!-- Live Schedule: who picks who, today and the next several days -->
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <span class="card-title">
+            <i class="fas fa-route" style="color:#16a34a"></i>
+            Live Pickup Schedule
+          </span>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <select id="scheduleWindow" class="form-control" style="width:130px;padding:0.3rem 0.6rem;font-size:0.8rem">
+              <option value="1">Today</option>
+              <option value="2">Today + tomorrow</option>
+              <option value="7" selected>Next 7 days</option>
+              <option value="14">Next 14 days</option>
+              <option value="30">Next 30 days</option>
+            </select>
+            <span id="scheduleSummary" style="font-size:0.8rem;color:#64748b">Loading…</span>
+          </div>
+        </div>
+        <div class="card-body" id="scheduleBody" style="padding:1rem">
+          <div class="skeleton" style="height:80px;border-radius:8px"></div>
+        </div>
+      </div>
+
       <!-- Data Tables Row -->
       <div class="grid-2" style="margin-top:1.5rem;gap:1.5rem">
         <!-- Recent Registrations -->
@@ -246,7 +269,7 @@
 <!-- Toast container will be injected by utils.js -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=8"></script>
+<script src="/js/api.js?v=9"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   // Auth guard
@@ -516,16 +539,103 @@
     }
   };
 
+  // Format a date as e.g. "Mon 25 May" — short enough to fit the schedule grid.
+  const fmtShortDate = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GH', { weekday: 'short', day: '2-digit', month: 'short' });
+  };
+
+  const loadLiveSchedule = async () => {
+    const body = document.getElementById('scheduleBody');
+    const summary = document.getElementById('scheduleSummary');
+    const days = document.getElementById('scheduleWindow').value;
+    body.innerHTML = '<div class="skeleton" style="height:80px;border-radius:8px"></div>';
+    try {
+      const { data } = await api.getLiveSchedule(`?days=${days}`);
+      const { drivers, summary: s } = data;
+
+      summary.textContent = s.total === 0
+        ? 'No pickups in this window'
+        : `${s.total} pickup${s.total === 1 ? '' : 's'} • ${s.driversWithWork} driver${s.driversWithWork === 1 ? '' : 's'} • ${s.picked} picked / ${s.missed} missed / ${s.scheduled} pending`;
+
+      if (!drivers.length) {
+        body.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="empty-title">No pickups scheduled for this window</div>
+            <div class="empty-subtitle">Assign customers to drivers and the system will auto-schedule pickups.</div>
+          </div>`;
+        return;
+      }
+
+      // Render one card per driver. Show the next several pickups inline so a
+      // super admin can scan "today, John is doing X then Y then Z" at a glance.
+      body.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:1rem">
+          ${drivers.map((d) => {
+            const upcoming = d.pickups.slice(0, 6); // cap so the card stays compact
+            const more = d.pickups.length - upcoming.length;
+            return `
+              <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;border-left:4px solid #16a34a">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+                  ${d.driverImage
+                    ? `<img src="${d.driverImage}" style="width:38px;height:38px;border-radius:50%;object-fit:cover" />`
+                    : `<div class="avatar avatar-sm">${getInitials(d.driverName)}</div>`}
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:0.95rem">${d.driverName}</div>
+                    <div style="font-size:0.72rem;color:#64748b">
+                      ${d.truckNumber ? `<i class="fas fa-truck"></i> ${d.truckNumber} · ` : ''}${d.driverPhone || ''}
+                    </div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-weight:700;font-size:1.1rem">${d.counts.total}</div>
+                    <div style="font-size:0.7rem;color:#64748b">pickups</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;font-size:0.7rem">
+                  <span class="badge badge-warning">${d.counts.scheduled} pending</span>
+                  <span class="badge badge-success">${d.counts.picked} picked</span>
+                  ${d.counts.missed ? `<span class="badge badge-danger">${d.counts.missed} missed</span>` : ''}
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.4rem;font-size:0.82rem">
+                  ${upcoming.map((p) => {
+                    const color = p.status === 'picked' ? '#16a34a' : p.status === 'missed' ? '#ef4444' : '#eab308';
+                    return `
+                      <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.55rem;background:#f8fafc;border-radius:8px">
+                        <span style="width:8px;height:8px;border-radius:50%;background:${color};flex:0 0 auto"></span>
+                        <span style="color:#64748b;font-size:0.72rem;min-width:80px">${fmtShortDate(p.scheduledDate)}</span>
+                        <span style="font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${p.customerName} — ${p.customerAddress || ''}">${p.customerName}</span>
+                        <span style="font-size:0.7rem;color:#94a3b8">${p.customerId || ''}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                  ${more > 0 ? `<a href="/admin/collections.html?driver=${d.driverId}" style="font-size:0.78rem;color:#16a34a;text-align:center;padding:0.4rem 0">+ ${more} more — view all</a>` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>`;
+    } catch (err) {
+      summary.textContent = 'Failed to load';
+      body.innerHTML = `<div class="empty-state" style="color:#dc2626"><div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div><div class="empty-title">Failed to load live schedule</div><div class="empty-subtitle">${err.message || ''}</div></div>`;
+      console.error('Live schedule error:', err);
+    }
+  };
+
   // Revenue year selector
   document.getElementById('revenueYear').addEventListener('change', (e) => {
     loadRevenueChart(e.target.value);
   });
+
+  // Schedule window selector
+  document.getElementById('scheduleWindow').addEventListener('change', loadLiveSchedule);
 
   // Refresh button
   document.getElementById('refreshBtn').addEventListener('click', () => {
     loadStats();
     loadCollectionsChart();
     loadOutstanding();
+    loadLiveSchedule();
   });
 
   // Init
@@ -533,6 +643,7 @@
   loadRevenueChart(new Date().getFullYear());
   loadCollectionsChart();
   loadOutstanding();
+  loadLiveSchedule();
   loadCustomerMap();
 </script>
 </body>

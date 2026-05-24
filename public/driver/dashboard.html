@@ -16,7 +16,7 @@
     .collection-card.status-picked { border-left: 4px solid var(--green-500); }
     .collection-card.status-missed { border-left: 4px solid var(--red-500); }
     .collection-card.status-scheduled { border-left: 4px solid var(--yellow-500); }
-    .collections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .collections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 1rem; }
     .customer-info { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
     .addr-text { font-size: 0.8rem; color: var(--gray-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .action-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
@@ -186,7 +186,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=7"></script>
+<script src="/js/api.js?v=9"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   const user = requireAuth(['driver']);
