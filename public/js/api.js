@@ -5,7 +5,7 @@
 // The JS layer never sees or stores the raw JWT.
 // =============================================
 
-const API_BASE = '/api/v1';
+const API_BASE = 'https://api.035farkohwastemanagement.com/api/v1';
 
 class ApiClient {
   get headers() {
