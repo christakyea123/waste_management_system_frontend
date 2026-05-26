@@ -5,7 +5,17 @@
 // The JS layer never sees or stores the raw JWT.
 // =============================================
 
-const API_BASE = 'https://api.035farkohwastemanagement.com/api/v1';
+// Use the same host the page was loaded from when running locally (so cookies
+// stay same-origin), and the production API domain everywhere else. Without
+// this, opening http://localhost:5000/customer/login.html would try to fetch
+// the prod API and fail with "Failed to fetch".
+const API_BASE = (() => {
+  const { hostname, origin } = window.location;
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+    return `${origin}/api/v1`;
+  }
+  return 'https://api.035farkohwastemanagement.com/api/v1';
+})();
 
 class ApiClient {
   get headers() {

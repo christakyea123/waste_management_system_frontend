@@ -173,14 +173,75 @@
     .login-link { text-align: center; font-size: 0.875rem; color: var(--gray-500); margin-top: 1.5rem; }
     .login-link a { color: var(--green-700); font-weight: 600; text-decoration: none; }
 
+    /* ---- PLAN CARDS ---- */
+    /* Replaces the native <select> for bin type: native options can't be
+       wrapped or styled, so on a 360-wide phone the label "Standard — Weekly
+       collection — GHS 80/mo (120L)" gets truncated to "GH...". Cards wrap
+       freely and stack on mobile. */
+    .plan-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      margin-top: 0.35rem;
+    }
+    .plan-card {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.85rem 0.9rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius);
+      background: var(--white);
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      position: relative;
+    }
+    .plan-card:hover { border-color: #86efac; }
+    .plan-card.selected {
+      border-color: var(--green-600);
+      background: var(--green-50);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.12);
+    }
+    .plan-card input[type="radio"] {
+      margin-top: 0.2rem;
+      accent-color: var(--green-600);
+      flex-shrink: 0;
+      width: 1rem; height: 1rem;
+    }
+    .plan-card-body { flex: 1; min-width: 0; }
+    .plan-card-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.4rem 0.6rem;
+      margin-bottom: 0.2rem;
+    }
+    .plan-card-name { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); }
+    .plan-card-price { font-size: 0.85rem; font-weight: 700; color: var(--green-700); }
+    .plan-card-meta { font-size: 0.78rem; color: var(--gray-500); line-height: 1.35; }
+    .plan-card-loading {
+      padding: 0.85rem;
+      border: 1.5px dashed var(--gray-200);
+      border-radius: var(--radius);
+      color: var(--gray-400);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
     /* ---- RESPONSIVE ---- */
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
       .auth-card { padding: 1.5rem; }
+      /* Plan cards already stack at 1fr — keep title row wrapping clean. */
+      .plan-card { padding: 0.75rem 0.8rem; }
+      .plan-card-name { font-size: 0.9rem; }
+      .plan-card-price { font-size: 0.82rem; }
+      .plan-card-meta { font-size: 0.75rem; }
     }
     @media (max-width: 400px) {
       .auth-card { padding: 1.25rem; }
       .auth-logo img { height: 52px; }
+      .plan-card { gap: 0.55rem; padding: 0.7rem 0.75rem; }
     }
   </style>
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('wm_theme') || 'light');</script>
@@ -230,22 +291,21 @@
             <input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email" />
             <span class="error-msg">Please enter a valid email address</span>
           </div>
-          <div class="form-row">
-            <div class="form-group" id="g_password">
-              <label for="password">Password *</label>
-              <div class="password-wrapper">
-                <input type="password" id="password" name="password" placeholder="Min 8 characters" autocomplete="new-password" />
-                <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show/hide password">
-                  <i class="fas fa-eye" id="eyeIcon"></i>
-                </button>
-              </div>
-              <span class="error-msg">Password must be at least 8 characters</span>
+          <div class="form-group" id="g_password">
+            <label for="password">Password *</label>
+            <div class="password-wrapper">
+              <input type="password" id="password" name="password" placeholder="Min 8 characters" autocomplete="new-password" />
+              <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show/hide password">
+                <i class="fas fa-eye" id="eyeIcon"></i>
+              </button>
             </div>
-            <div class="form-group" id="g_binType">
-              <label for="binType">Waste Bin Type *</label>
-              <select id="binType" name="binType" disabled>
-                <option value="">Loading plans…</option>
-              </select>
+            <span class="error-msg">Password must be at least 8 characters</span>
+          </div>
+          <div class="form-group" id="g_binType">
+            <label>Waste Bin Type *</label>
+            <input type="hidden" id="binType" name="binType" value="standard" />
+            <div class="plan-cards" id="planCards" role="radiogroup" aria-label="Choose a waste bin plan">
+              <div class="plan-card-loading">Loading plans…</div>
             </div>
           </div>
           <div class="btn-nav">
@@ -360,17 +420,46 @@
 
     const planParam = new URLSearchParams(window.location.search).get('plan');
 
+    // Render the bin-type chooser as stackable cards (not a native <select>),
+    // because native options can't wrap and were truncating on phones.
     const renderBinOptions = () => {
-      const sel = document.getElementById('binType');
-      const previous = sel.value || planParam;
-      sel.innerHTML = Object.keys(BIN_META).map((key) => {
+      const hidden = document.getElementById('binType');
+      const container = document.getElementById('planCards');
+      const previous = hidden.value || planParam;
+      const initial = (previous && BIN_META[previous]) ? previous : 'standard';
+
+      container.innerHTML = Object.keys(BIN_META).map((key) => {
         const m = BIN_META[key];
         const price = livePricing[key];
-        return `<option value="${key}">${m.name} &mdash; GHS ${price}/mo (${m.size.replace(' bin', '')})</option>`;
+        const checked = key === initial ? 'checked' : '';
+        const selectedCls = key === initial ? ' selected' : '';
+        return `
+          <label class="plan-card${selectedCls}" data-plan="${key}">
+            <input type="radio" name="binTypeRadio" value="${key}" ${checked} />
+            <div class="plan-card-body">
+              <div class="plan-card-title">
+                <span class="plan-card-name">${m.name}</span>
+                <span class="plan-card-price">GHS ${price}/mo</span>
+              </div>
+              <div class="plan-card-meta">${m.freq} &bull; ${m.size}</div>
+            </div>
+          </label>
+        `;
       }).join('');
-      // Restore the URL-param / previously-selected plan if it's still valid.
-      if (previous && BIN_META[previous]) sel.value = previous;
-      sel.disabled = false;
+
+      hidden.value = initial;
+
+      // Wire selection: clicking anywhere on a card sets the radio + hidden
+      // input + visual selected state.
+      container.querySelectorAll('.plan-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          const key = card.dataset.plan;
+          hidden.value = key;
+          container.querySelectorAll('.plan-card').forEach((c) => c.classList.toggle('selected', c === card));
+          const radio = card.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+        });
+      });
     };
 
     // Fire-and-forget: if the API is unreachable we fall back to the env defaults
@@ -571,9 +660,9 @@
     // Reads from livePricing + BIN_META so the summary on step 3 stays in
     // sync with whatever the admin set in /admin/settings.
     const updatePlanSummary = () => {
-      const key = document.getElementById('binType').value || 'basic';
-      const meta = BIN_META[key] || BIN_META.basic;
-      const price = livePricing[key] ?? livePricing.basic;
+      const key = document.getElementById('binType').value || 'standard';
+      const meta = BIN_META[key] || BIN_META.standard;
+      const price = livePricing[key] ?? livePricing.standard;
       document.getElementById('planSummary').innerHTML =
         `<strong>${meta.name} Plan</strong> &mdash; GHS ${price}/month<br>${meta.size} &bull; ${meta.freq}`;
     };
