@@ -287,19 +287,14 @@
             </div>
           </div>
           <div class="form-group" id="g_email">
-            <label for="email">Email Address *</label>
+            <label for="email">Email Address <span style="font-weight:400;color:var(--gray-400)">(Optional)</span></label>
             <input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email" />
             <span class="error-msg">Please enter a valid email address</span>
           </div>
-          <div class="form-group" id="g_password">
-            <label for="password">Password *</label>
-            <div class="password-wrapper">
-              <input type="password" id="password" name="password" placeholder="Min 8 characters" autocomplete="new-password" />
-              <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show/hide password">
-                <i class="fas fa-eye" id="eyeIcon"></i>
-              </button>
-            </div>
-            <span class="error-msg">Password must be at least 8 characters</span>
+          <div class="form-group" id="g_username">
+            <label for="usernamePreview">Your Username</label>
+            <input type="text" id="usernamePreview" readonly placeholder="Auto-generated from your name" style="background:var(--gray-50);" />
+            <small>Auto-created from your name. You'll sign in with this username and your phone number — no password to remember.</small>
           </div>
           <div class="form-group" id="g_binType">
             <label>Waste Bin Type *</label>
@@ -323,12 +318,23 @@
             <input type="text" id="residentialAddress" name="residentialAddress" placeholder="e.g. House No. 5, Mfoum, Dunkwa" />
             <span class="error-msg">Residential address is required</span>
           </div>
-          <div class="form-group" id="g_route">
-            <label for="collectionRoute">Collection Area / Route *</label>
-            <select id="collectionRoute" name="collectionRoute">
-              <option value="">-- Loading areas... --</option>
+          <div class="form-group" id="g_area">
+            <label for="area">Your Area *</label>
+            <select id="area" name="area">
+              <option value="">-- Select your area --</option>
+              <option value="Mfoum">Mfoum</option>
+              <option value="Estate">Estate</option>
+              <option value="Oxford">Oxford</option>
+              <option value="Abesewa">Abesewa</option>
+              <option value="Kadadwene/Zongo">Kadadwene / Zongo</option>
+              <option value="Buzagaline">Buzagaline</option>
+              <option value="Main market/low cost">Main market / low cost</option>
+              <option value="Atecham">Atecham</option>
+              <option value="Dunkwa soro">Dunkwa soro</option>
+              <option value="Atecham police">Atecham police</option>
             </select>
-            <span class="error-msg">Please select your collection area</span>
+            <span class="error-msg">Please select your area</span>
+            <small>Areas supplied within Dunkwa-on-Offin municipality</small>
           </div>
           <div class="form-group">
             <label>GPS Location *</label>
@@ -398,7 +404,7 @@
   </div>
 
   <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=9"></script>
+<script src="/js/api.js?v=12"></script>
   <script>
     let currentStep = 1;
     let locationCaptured = false;
@@ -476,23 +482,6 @@
       }
     })();
 
-    // ── Routes dropdown ──
-    (async () => {
-      const sel = document.getElementById('collectionRoute');
-      try {
-        const result = await api.getPublicRoutes();
-        const routes = result?.data?.routes || [];
-        if (routes.length === 0) {
-          sel.innerHTML = '<option value="">-- No areas available yet --</option>';
-        } else {
-          sel.innerHTML = '<option value="">-- Select your area --</option>' +
-            routes.map(r => `<option value="${r._id}">${r.name}${r.zone ? ' — ' + r.zone : ''}</option>`).join('');
-        }
-      } catch {
-        sel.innerHTML = '<option value="">-- Could not load areas. Please refresh. --</option>';
-      }
-    })();
-
     // ── Alert helper ──
     const showAlert = (msg, type = 'error') => {
       const el = document.getElementById('formAlert');
@@ -551,19 +540,17 @@
       const name  = document.getElementById('fullName').value.trim();
       const phone = normalisePhone(document.getElementById('phone').value);
       const email = document.getElementById('email').value.trim();
-      const pass  = document.getElementById('password').value;
 
       const nameOk  = name.length >= 2;
       const phoneOk = /^(\+233|0)[0-9]{9}$/.test(phone);
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      const passOk  = pass.length >= 8;
+      // Email is optional: blank is fine, but if provided it must be valid.
+      const emailOk = email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
       setFieldError('g_fullName', !nameOk);
       setFieldError('g_phone',    !phoneOk);
       setFieldError('g_email',    !emailOk);
-      setFieldError('g_password', !passOk);
 
-      if (!nameOk || !phoneOk || !emailOk || !passOk) {
+      if (!nameOk || !phoneOk || !emailOk) {
         showAlert('Please fix the highlighted fields before continuing.');
         // Scroll to first error
         const first = document.querySelector('#step1 .form-group.has-error input, #step1 .form-group.has-error select');
@@ -574,14 +561,14 @@
     };
 
     const validateStep2 = () => {
-      const addr  = document.getElementById('residentialAddress').value.trim();
-      const route = document.getElementById('collectionRoute').value;
+      const addr = document.getElementById('residentialAddress').value.trim();
+      const area = document.getElementById('area').value;
 
       setFieldError('g_address', !addr);
-      setFieldError('g_route',   !route);
+      setFieldError('g_area',    !area);
 
-      if (!addr || !route) {
-        showAlert('Please fill in your address and select a collection area.');
+      if (!addr || !area) {
+        showAlert('Please fill in your address and select your area.');
         const first = document.querySelector('#step2 .form-group.has-error input, #step2 .form-group.has-error select');
         if (first) first.focus();
         return false;
@@ -605,6 +592,25 @@
       showStep(from + 1);
     };
     const prevStep = (from) => { hideAlert(); showStep(from - 1); };
+
+    // ── Live username preview ──
+    // Mirrors the server's generator (firstname.lastname). The final username
+    // gets a unique numeric suffix assigned on the server and is shown after
+    // registration, so this is a "your username will look like this" preview.
+    const buildUsernameBase = (name) =>
+      (name || '')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .join('.');
+
+    document.getElementById('fullName').addEventListener('input', (e) => {
+      const base = buildUsernameBase(e.target.value);
+      document.getElementById('usernamePreview').value = base ? `${base}##` : '';
+    });
 
     // ── GPS Capture ──
     const captureLocation = () => {
@@ -694,14 +700,6 @@
     document.getElementById('next1Btn').onclick = () => patchedNext(1);
     document.getElementById('next2Btn').onclick = () => patchedNext(2);
 
-    // ── Password toggle ──
-    const togglePassword = () => {
-      const input = document.getElementById('password');
-      const icon  = document.getElementById('eyeIcon');
-      input.type  = input.type === 'password' ? 'text' : 'password';
-      icon.className = `fas fa-eye${input.type === 'password' ? '' : '-slash'}`;
-    };
-
     // ── Photo preview ──
     document.getElementById('profileImage').addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -727,16 +725,17 @@
       try {
         const formData = new FormData();
         formData.append('fullName',           document.getElementById('fullName').value.trim());
-        formData.append('email',              document.getElementById('email').value.trim().toLowerCase());
         formData.append('phone',              normalisePhone(document.getElementById('phone').value));
-        formData.append('password',           document.getElementById('password').value);
+        // No password field — the backend uses the phone number as the password.
         formData.append('residentialAddress', document.getElementById('residentialAddress').value.trim());
+        formData.append('area',               document.getElementById('area').value);
         formData.append('latitude',           document.getElementById('latitude').value);
         formData.append('longitude',          document.getElementById('longitude').value);
         formData.append('binType',            document.getElementById('binType').value);
 
-        const routeVal = document.getElementById('collectionRoute').value;
-        if (routeVal) formData.append('collectionRoute', routeVal);
+        // Email is optional — only send it when the user actually entered one.
+        const emailVal = document.getElementById('email').value.trim().toLowerCase();
+        if (emailVal) formData.append('email', emailVal);
 
         const emergencyName  = document.getElementById('emergencyName').value.trim();
         const emergencyPhone = document.getElementById('emergencyPhone').value.trim();
@@ -749,7 +748,18 @@
 
         const result = await api.register(formData);
         saveAuthState(result);
-        window.location.href = '/customer/dashboard.html';
+
+        // Show the generated username prominently so the customer can save it —
+        // it's their login ID (paired with their phone number as the password).
+        const uname = result?.user?.username;
+        if (uname) {
+          try { localStorage.setItem('wm_username', uname); } catch (_) {}
+          showAlert(`Account created! Your username is "${uname}". Use it with your phone number to sign in. Redirecting…`, 'success');
+          submitBtn.innerHTML = '<i class="fas fa-check"></i> Account Created';
+          setTimeout(() => { window.location.href = '/customer/dashboard.html'; }, 3500);
+        } else {
+          window.location.href = '/customer/dashboard.html';
+        }
       } catch (err) {
         let msg = err.message || 'Registration failed. Please try again.';
         if (err.errors?.length) {

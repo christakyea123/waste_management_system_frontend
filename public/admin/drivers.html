@@ -187,28 +187,26 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Email *</label>
-          <input type="email" class="form-control" name="email" placeholder="driver@example.com" required />
+          <label class="form-label">Email <span style="font-weight:400;color:#94a3b8">(Optional)</span></label>
+          <input type="email" class="form-control" name="email" placeholder="driver@example.com" />
         </div>
         <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Password *</label>
-            <input type="password" class="form-control" name="password" placeholder="Min 8 characters" minlength="8" required />
-          </div>
           <div class="form-group">
             <label class="form-label">Truck Number *</label>
             <input type="text" class="form-control" name="truckNumber" placeholder="GH-1234-20" required />
           </div>
-        </div>
-        <div class="form-grid">
           <div class="form-group">
             <label class="form-label">License Number</label>
             <input type="text" class="form-control" name="licenseNumber" placeholder="GHA-DL-12345" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Zone</label>
-            <input type="text" class="form-control" name="zone" placeholder="e.g. Zone A" />
-          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zone</label>
+          <input type="text" class="form-control" name="zone" placeholder="e.g. Zone A" />
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bae6fd;color:#0369a1;padding:0.7rem 0.9rem;border-radius:8px;font-size:0.82rem">
+          <i class="fas fa-info-circle"></i>
+          No password needed. The driver logs in with an auto-generated <strong>username</strong> and their <strong>phone number</strong> as the password. The username is shown once you create the driver.
         </div>
         <div class="form-group">
           <label class="form-label">Profile Photo</label>
@@ -225,7 +223,7 @@
 </div>
 
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=9"></script>
+<script src="/js/api.js?v=12"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   // Surface unexpected errors so the page never appears "stuck loading" silently.
@@ -342,9 +340,16 @@
       const file = formData.get('profileImage');
       if (file instanceof File && file.size === 0) formData.delete('profileImage');
 
-      await api.createDriver(formData);
-      Toast.success('Driver Added', 'New driver account created successfully');
+      const res = await api.createDriver(formData);
+      const username = res?.data?.username;
+      const phone = formData.get('phone');
       closeModal('addDriverModal');
+      // Surface the generated login so the admin can pass it to the driver.
+      if (username) {
+        Toast.success('Driver Added', `Username: ${username} — password is the phone number (${phone}).`);
+      } else {
+        Toast.success('Driver Added', 'New driver account created successfully');
+      }
       loadDrivers(1);
     } catch (err) {
       const detail = Array.isArray(err.errors) && err.errors.length

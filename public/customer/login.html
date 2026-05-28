@@ -84,19 +84,18 @@
 
       <div class="error-box" id="errorBox"><i class="fas fa-exclamation-circle"></i><span id="errorMsg"></span></div>
 
-      <form id="loginForm">
+      <form id="loginForm" autocomplete="off">
         <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Start typing your username…" autocomplete="off" list="usernameOptions" required />
+          <datalist id="usernameOptions"></datalist>
+          <span class="field-hint">Pick your username (created when you registered).</span>
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
-          <div class="password-wrap">
-            <input type="password" id="password" name="password" placeholder="Your password" autocomplete="current-password" required />
-            <button type="button" class="password-toggle" onclick="togglePwd('password','eyeIco')" aria-label="Show/hide"><i class="fas fa-eye" id="eyeIco"></i></button>
-          </div>
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="0244123456" autocomplete="off" required />
+          <span class="field-hint">Your phone number is your password.</span>
         </div>
-        <div style="text-align:right; margin-bottom:1rem"><button type="button" class="forgot-link" onclick="showForgotPanel()">Forgot password?</button></div>
         <button type="submit" class="btn btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
       </form>
 
@@ -155,7 +154,7 @@
   </div>
 
   <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=9"></script>
+<script src="/js/api.js?v=12"></script>
   <script>
     const existingUser = getAuthUser();
     const authExpiry = localStorage.getItem('wm_auth_expiry');
@@ -166,12 +165,30 @@
       else if (['admin', 'superadmin'].includes(role)) window.location.href = '/admin/index.html';
     }
 
-    function togglePwd(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const ico = document.getElementById(iconId);
-      input.type = input.type === 'password' ? 'text' : 'password';
-      ico.className = `fas fa-eye${input.type === 'password' ? '' : '-slash'}`;
-    }
+    // ── Username type-to-search ──
+    // Queries the backend as the customer types and fills the <datalist> so they
+    // can pick their username. Debounced; needs >= 2 chars (server enforces too).
+    const usernameInput = document.getElementById('username');
+    const usernameList = document.getElementById('usernameOptions');
+    let usernameTimer;
+    usernameInput.addEventListener('input', () => {
+      clearTimeout(usernameTimer);
+      const q = usernameInput.value.trim();
+      if (q.length < 2) { usernameList.innerHTML = ''; return; }
+      usernameTimer = setTimeout(async () => {
+        try {
+          const res = await api.searchUsernames(q);
+          const names = res?.data?.usernames || [];
+          usernameList.innerHTML = names.map((u) => `<option value="${u}"></option>`).join('');
+        } catch (_) { /* non-fatal — they can still type it manually */ }
+      }, 250);
+    });
+
+    // Prefill the username from the last registration on this device, if any.
+    try {
+      const saved = localStorage.getItem('wm_username');
+      if (saved && !usernameInput.value) usernameInput.value = saved;
+    } catch (_) {}
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -181,7 +198,9 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
       btn.disabled = true;
       try {
-        const result = await api.login(document.getElementById('email').value.trim(), document.getElementById('password').value);
+        const username = document.getElementById('username').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const result = await api.loginWithUsername(username, phone);
         saveAuthState(result);
         const role = result.user.role;
         if (role === 'customer') window.location.href = '/customer/dashboard.html';

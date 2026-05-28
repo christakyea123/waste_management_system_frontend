@@ -62,7 +62,7 @@
 
     <div class="info-box">
       <i class="fas fa-info-circle"></i>
-      Your login credentials were provided by the admin. Contact your supervisor if you need help.
+      Log in with the username the admin gave you and your phone number. Contact your supervisor if you need help.
     </div>
 
     <!-- â”€â”€ Login Form â”€â”€ -->
@@ -73,20 +73,15 @@
 
       <form id="loginForm">
         <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="driver@wastemanagement.com" required autocomplete="email" />
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Start typing your username…" autocomplete="off" list="usernameOptions" required />
+          <datalist id="usernameOptions"></datalist>
+          <span class="field-hint">The username provided by your admin.</span>
         </div>
         <div class="form-group">
-          <label for="password" style="display:flex;justify-content:space-between;align-items:center">
-            Password
-            <button type="button" class="forgot-link" onclick="showForgotPanel()">Forgot password?</button>
-          </label>
-          <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Your password" required autocomplete="current-password" />
-            <button type="button" class="password-toggle" onclick="togglePwd('password','eyeIco')">
-              <i class="fas fa-eye" id="eyeIco"></i>
-            </button>
-          </div>
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="0244123456" autocomplete="off" required />
+          <span class="field-hint">Your phone number is your password.</span>
         </div>
         <button type="submit" class="btn btn-driver" id="loginBtn">
           <i class="fas fa-truck"></i> Login to Driver Portal
@@ -170,7 +165,7 @@
   </div>
 
   <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=9"></script>
+<script src="/js/api.js?v=12"></script>
   <script>
     const u = getAuthUser();
     const _exp = localStorage.getItem('wm_auth_expiry');
@@ -185,6 +180,24 @@
       ico.className = `fas fa-eye${input.type === 'password' ? '' : '-slash'}`;
     }
 
+    // Type-to-search the driver's username (role=driver) so they can pick it.
+    // Debounced; needs >= 2 chars (server enforces too).
+    const usernameInput = document.getElementById('username');
+    const usernameList = document.getElementById('usernameOptions');
+    let usernameTimer;
+    usernameInput.addEventListener('input', () => {
+      clearTimeout(usernameTimer);
+      const q = usernameInput.value.trim();
+      if (q.length < 2) { usernameList.innerHTML = ''; return; }
+      usernameTimer = setTimeout(async () => {
+        try {
+          const res = await api.searchUsernames(q, 'driver');
+          const names = res?.data?.usernames || [];
+          usernameList.innerHTML = names.map((u) => `<option value="${u}"></option>`).join('');
+        } catch { /* non-fatal — user can still type their full username */ }
+      }, 250);
+    });
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('loginBtn');
@@ -195,9 +208,9 @@
       btn.disabled = true;
 
       try {
-        const result = await api.login(
-          document.getElementById('email').value.trim(),
-          document.getElementById('password').value
+        const result = await api.loginWithUsername(
+          document.getElementById('username').value.trim(),
+          document.getElementById('phone').value.trim()
         );
         if (result.user.role !== 'driver') {
           throw { message: 'This portal is for drivers only. Use the correct login portal.' };
@@ -336,7 +349,7 @@
         document.getElementById('fpSuccessMsg2').textContent = 'Password reset! You can now log in.';
         setTimeout(() => {
           hideForgotPanel();
-          document.getElementById('email').focus();
+          document.getElementById('username').focus();
         }, 2000);
       } catch (err) {
         document.getElementById('fpErrorMsg2').textContent = err.message || 'Reset failed. Try again.';

@@ -148,6 +148,9 @@
           <option value="rescheduled">Rescheduled</option>
           <option value="blocked_access">Blocked access</option>
         </select>
+        <select class="form-control" id="monthFilter" style="width:150px">
+          <option value="">All months</option>
+        </select>
         <input type="date" class="form-control" id="dateFilter" style="width:170px" />
         <button class="btn btn-sm btn-outline" id="todayBtn" type="button">Today</button>
         <button class="btn btn-sm btn-outline" id="anyDateBtn" type="button">Any date</button>
@@ -220,7 +223,7 @@
 </div>
 
 <script src="/js/bootstrap.js?v=1"></script>
-<script src="/js/api.js?v=9"></script>
+<script src="/js/api.js?v=12"></script>
 <script src="/js/utils.js?v=7"></script>
 <script>
   window.addEventListener('error', (e) => console.error('[collections]', e.message, e.error));
@@ -235,6 +238,20 @@
   const user = requireAuth(['driver']);
   if (!user) throw new Error('Not authenticated');
   initSidebar(); initTheme(); populateSidebarUser(user);
+
+  // Populate the month filter and default to the current month, so the driver
+  // sees the same per-month pickup count the customer sees (e.g. a Standard
+  // customer = 4 weekly pickups), not the current + next month the scheduler
+  // has already materialised ahead.
+  const monthSel = document.getElementById('monthFilter');
+  ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = i + 1;
+    opt.textContent = m;
+    monthSel.appendChild(opt);
+  });
+  monthSel.value = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
 
   // ── State ──────────────────────────────────────────────────────────
   const todayISO = () => {
@@ -255,15 +272,21 @@
   const buildParams = (page) => {
     const status = document.getElementById('statusFilter').value;
     const date = document.getElementById('dateFilter').value;
+    const month = document.getElementById('monthFilter').value;
     let p = `?page=${page}&limit=20`;
     if (status) p += `&status=${status}`;
+    // A specific date overrides the month scope (the driver picked one day).
     if (date) p += `&date=${date}`;
+    else if (month) p += `&month=${month}&year=${currentYear}`;
     return p;
   };
 
   const summaryParams = () => {
     const date = document.getElementById('dateFilter').value;
-    return date ? `?date=${date}` : '';
+    const month = document.getElementById('monthFilter').value;
+    if (date) return `?date=${date}`;
+    if (month) return `?month=${month}&year=${currentYear}`;
+    return '';
   };
 
   const renderChips = (counts, total) => {
@@ -494,6 +517,7 @@
   document.getElementById('newStatus').addEventListener('change', toggleStatusFields);
   document.getElementById('updateBtn').addEventListener('click', updateStatus);
   document.getElementById('statusFilter').addEventListener('change', () => loadAll(1));
+  document.getElementById('monthFilter').addEventListener('change',  () => loadAll(1));
   document.getElementById('dateFilter').addEventListener('change',   () => loadAll(1));
   document.getElementById('todayBtn').addEventListener('click', () => {
     document.getElementById('dateFilter').value = todayISO();
@@ -506,6 +530,8 @@
   document.getElementById('clearBtn').addEventListener('click', () => {
     document.getElementById('statusFilter').value = '';
     document.getElementById('dateFilter').value = '';
+    // "Clear" returns to the default per-month view (current month).
+    document.getElementById('monthFilter').value = new Date().getMonth() + 1;
     loadAll(1);
   });
   document.getElementById('refreshBtn').addEventListener('click', () => loadAll(currentPage));

@@ -75,7 +75,15 @@ class ApiClient {
   putForm(path, formData)   { return this.request('PUT',    path, formData, true); }
 
   // Auth
-  login(email, password)  { return this.post('/auth/login', { email, password }); }
+  // Staff (admin/driver): `identifier` may be an email OR phone, plus password.
+  login(identifier, password)  { return this.post('/auth/login', { identifier, password }); }
+  // Customer & driver: username + phone (phone acts as the password).
+  loginWithUsername(username, phone) { return this.post('/auth/login', { username, phone }); }
+  // Public username type-to-search for the login pages. `role` is 'customer'
+  // (default) or 'driver' so each portal only suggests its own usernames.
+  searchUsernames(q, role = 'customer') {
+    return this.get(`/auth/usernames?q=${encodeURIComponent(q)}&role=${encodeURIComponent(role)}`);
+  }
   logout()                { return this.post('/auth/logout'); }
   getMe()                 { return this.get('/auth/me'); }
   updateProfile(data)     {
